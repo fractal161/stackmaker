@@ -19,12 +19,18 @@ class StackMaker(QMainWindow):
     exitAct.setStatusTip('Exit application')
     exitAct.triggered.connect(qApp.quit)
 
+    copyAct = QAction(QIcon('copy.png'), '&Copy', self)
+    copyAct.setShortcut('Ctrl+C')
+    copyAct.setStatusTip('Copy entire board')
+    copyAct.triggered.connect(self.copy)
+
     statusbar = self.statusBar()
     statusbar.setStyleSheet("QStatusBar{border-top: 1px outset grey;}")
 
     menubar = self.menuBar()
     fileMenu = menubar.addMenu('&File')
     fileMenu.addAction(exitAct)
+    fileMenu.addAction(copyAct)
 
     self.resize(768, 720 + self.statusBar().sizeHint().height()+ menubar.sizeHint().height())
     self.center()
@@ -52,6 +58,18 @@ class StackMaker(QMainWindow):
   def resizeEvent(self, e):
     self.view.viewport().resize(self.width(), self.height() - self.statusBar().sizeHint().height()-self.menuBar().sizeHint().height())
     self.view.fitInView(self.view.sceneRect(), Qt.KeepAspectRatio)
+
+  def copy(self):
+    clipboard = QGuiApplication.clipboard()
+
+    board = QImage(self.scene.sceneRect().size().toSize(), QImage.Format_ARGB32)
+    board.fill(Qt.transparent)
+    painter = QPainter(board)
+    self.scene.render(painter)
+
+    clipboard.setImage(board)
+    painter.end()
+    self.statusBar().showMessage("Copied!", 1000)
 
 def main():
   app = QApplication(sys.argv)
