@@ -14,12 +14,12 @@ class StackMaker(QMainWindow):
 
   def initUI(self):
     # https://realpython.com/python-menus-toolbars/ for menu stuff later
-    exitAct = QAction(QIcon('exit.png'), '&Exit', self)
+    exitAct = QAction(QIcon('./assets/icons/exit.png'), '&Exit', self)
     exitAct.setShortcut('Ctrl+Q')
     exitAct.setStatusTip('Exit application')
     exitAct.triggered.connect(qApp.quit)
 
-    copyAct = QAction(QIcon('copy.png'), '&Copy', self)
+    copyAct = QAction(QIcon('./assets/icons/copy.png'), '&Copy', self)
     copyAct.setShortcut('Ctrl+C')
     copyAct.setStatusTip('Copy entire board')
     copyAct.triggered.connect(self.copy)
@@ -42,6 +42,35 @@ class StackMaker(QMainWindow):
     self.view = QGraphicsView(self.scene)
     self.view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
     self.view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+    # This is broken
+    eraseAct = QAction(QIcon('./assets/tile0.png'), '&Erase', self)
+    eraseAct.setShortcut('e')
+    eraseAct.setStatusTip('Erase cell')
+    # Use lambda?
+    eraseAct.triggered.connect(lambda x : self.scene.setCellType(0))
+
+    fillWhiteAct = QAction(QIcon('./assets/tile1.png'), '&White Cell', self)
+    fillWhiteAct.setShortcut('1')
+    fillWhiteAct.setStatusTip('Paint the white cell')
+    fillWhiteAct.triggered.connect(lambda x : self.scene.setCellType(1))
+
+    fillLightAct = QAction(QIcon('./assets/tile2.png'), '&Light Cell', self)
+    fillLightAct.setShortcut('2')
+    fillLightAct.setStatusTip('Paint the light cell')
+    fillLightAct.triggered.connect(lambda x : self.scene.setCellType(2))
+
+    fillDarkAct = QAction(QIcon('./assets/tile3.png'), '&Dark Cell', self)
+    fillDarkAct.setShortcut('3')
+    fillDarkAct.setStatusTip('Paint the dark cell')
+    fillDarkAct.triggered.connect(lambda x : self.scene.setCellType(3))
+
+    editMenu = menubar.addMenu('&Edit')
+    editMenu.addAction(eraseAct)
+    editMenu.addAction(fillWhiteAct)
+    editMenu.addAction(fillLightAct)
+    editMenu.addAction(fillDarkAct)
+
     self.setCentralWidget(self.view)
     self.show()
 
@@ -69,7 +98,7 @@ class StackMaker(QMainWindow):
 
     clipboard.setImage(board)
     painter.end()
-    self.statusBar().showMessage("Copied!", 1000)
+    self.statusBar().showMessage("Copied!", 500)
 
 def main():
   app = QApplication(sys.argv)

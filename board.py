@@ -26,9 +26,7 @@ class Cell(QGraphicsPixmapItem):
       self.setPixmap(QPixmap("./assets/tile1.png"))
       self.state = 1
 
-  # def mousePressEvent(self, e):
-  #   self.toggleState()
-
+  # Need to figure out how to handle this
   def hoverEnterEvent(self, e):
     if not self.state:
       self.setPixmap(QPixmap("./assets/tile1.png"))
@@ -36,14 +34,6 @@ class Cell(QGraphicsPixmapItem):
   def hoverLeaveEvent(self, e):
     if not self.state:
       self.setPixmap(QPixmap("./assets/tile0.png"))
-
-'''
-Game plan for proper drag-and-draw:
-Use mousePressEvent and mouseReleaseEvent to initiate/terminate "draw move"
-work with mouseMoveEvent and use itemAt/e.mousePos or whatever the method is to see what item needs to be updated.
-Maybe keep a boolean array of which cells have been updated to reduce total painting.
-
-'''
 
 class Board(QGraphicsScene):
   def __init__(self, width, height, *args, **kwargs):
@@ -65,12 +55,16 @@ class Board(QGraphicsScene):
         self.addItem(self.cells[i][j])
 
     self.drawMode = False
+    self.cellType = 1
+
+  def setCellType(self, type):
+    self.cellType = type
 
   def mousePressEvent(self, e):
     item = self.itemAt(e.scenePos(), QTransform())
     if item is not None and item is not self.image:
       self.drawMode = True
-      item.setState(1)
+      item.setState(self.cellType)
     super().mousePressEvent(e)
 
   def mouseReleaseEvent(self, e):
@@ -82,6 +76,6 @@ class Board(QGraphicsScene):
     if self.drawMode:
       item = self.itemAt(e.scenePos(), QTransform())
       if item is not None and item is not self.image:
-        item.setState(1)
+        item.setState(self.cellType)
 
     super().mouseMoveEvent(e)
