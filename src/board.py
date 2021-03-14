@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QGraphicsScene
 from PyQt5.QtGui import QPixmap, QTransform
 
 from .tiles import Cell, Digit
+from .connect import OcrHandler
 
 
 class Board(QGraphicsScene):
@@ -10,6 +11,7 @@ class Board(QGraphicsScene):
     self.height = height
     super().__init__(*args, **kwargs)
     self.initBoard()
+    self.ocrHandler = OcrHandler(self.cells)
 
   def initBoard(self):
     self.setSceneRect(0,0,256,240)

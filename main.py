@@ -4,6 +4,7 @@ import sys
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
+from PyQt5.QtNetwork import *
 
 from src.board import Board
 import src.debug
@@ -45,6 +46,14 @@ class StackMaker(QMainWindow):
     self.fillDarkAct.setStatusTip('Paint the dark cell')
     self.fillDarkAct.triggered.connect(lambda : self.scene.setCellType(3))
 
+    self.connectStatusAct = QAction(QIcon(), '&Enable/Disable', self)
+    self.connectStatusAct.triggered.connect(self.enableTracking)
+
+    self.toggleMirrorAct = QAction(QIcon(), '&Toggle Mirror', self)
+    self.toggleMirrorAct.setShortcut('Ctrl+M')
+    self.toggleMirrorAct.setEnabled(False)
+    self.toggleMirrorAct.triggered.connect(self.toggleMirror)
+
   def _createMenuBar(self):
     menubar = self.menuBar()
     fileMenu = menubar.addMenu('&File')
@@ -56,6 +65,10 @@ class StackMaker(QMainWindow):
     editMenu.addAction(self.fillWhiteAct)
     editMenu.addAction(self.fillLightAct)
     editMenu.addAction(self.fillDarkAct)
+
+    connectMenu = menubar.addMenu('&Connect')
+    connectMenu.addAction(self.connectStatusAct)
+    connectMenu.addAction(self.toggleMirrorAct)
 
   def _createToolBar(self):
     self.toolbar = self.addToolBar("test")
@@ -110,11 +123,24 @@ class StackMaker(QMainWindow):
     painter.end()
     self.statusBar().showMessage("Copied!", 500)
 
+  def toggleMirror(self):
+    self.scene.ocrHandler.socket.blockSignals(not self.scene.ocrHandler.socket.signalsBlocked())
+
   def doStuff(self):
     type = (1 + self.scene.cells[0][0].state) % 4
     for i in range(0, 20):
       for j in range(0, 10):
         self.scene.setCell(i,j,type)
+
+  def enableTracking(self):
+    if not self.scene.ocrHandler.connected:
+      print("Awaiting connection...")
+      self.scene.ocrHandler.listen(QHostAddress.LocalHost, 3338)
+      self.toggleMirrorAct.setEnabled(True)
+    else:
+      print("Disconnecting")
+      self.scene.ocrHandler.exit()
+      self.toggleMirrorAct.setEnabled(False)
 
 def main():
   app = QApplication(sys.argv)
