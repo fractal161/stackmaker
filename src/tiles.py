@@ -12,27 +12,27 @@ class Cell(QGraphicsPixmapItem):
 
   def setState(self, state):
     self.state = state
-    self.setPixmap(QPixmap(f"./assets/tile{state}.png"))
+    self.setPixmap(QPixmap(f'./assets/tile{state}.png'))
 
   def toggleState(self):
     if self.state:
-      self.setPixmap(QPixmap("./assets/tile0.png"))
+      self.setPixmap(QPixmap('./assets/tile0.png'))
       self.state = 0
     else:
-      self.setPixmap(QPixmap("./assets/tile1.png"))
+      self.setPixmap(QPixmap('./assets/tile1.png'))
       self.state = 1
 
   # Need to figure out how to handle this
   def hoverEnterEvent(self, e):
     if not self.state:
-      self.setPixmap(QPixmap("./assets/tile1.png"))
+      self.setPixmap(QPixmap('./assets/tile1.png'))
 
   def hoverLeaveEvent(self, e):
     if not self.state:
-      self.setPixmap(QPixmap("./assets/tile0.png"))
+      self.setPixmap(QPixmap('./assets/tile0.png'))
 
 class Digit(QGraphicsPixmapItem):
-  def __init__(self, x, y, *args, **kwargs):
+  def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
     self.state = 0
     self.setAcceptHoverEvents(True)
@@ -40,13 +40,13 @@ class Digit(QGraphicsPixmapItem):
 
   def setState(self, state):
     self.state = state
-    self.setPixmap(QPixmap(f"./assets/{state}.png"))
+    self.setPixmap(QPixmap(f'./assets/{state}.png'))
 
   # Need to figure out how to handle this
   # def hoverEnterEvent(self, e):
   #   if not self.state:
-  #     self.setPixmap(QPixmap("./assets/tile1.png"))
+  #     self.setPixmap(QPixmap('./assets/tile1.png'))
   #
   # def hoverLeaveEvent(self, e):
   #   if not self.state:
-  #     self.setPixmap(QPixmap("./assets/tile0.png"))
+  #     self.setPixmap(QPixmap('./assets/tile0.png'))

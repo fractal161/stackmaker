@@ -71,7 +71,7 @@ class StackMaker(QMainWindow):
     connectMenu.addAction(self.toggleMirrorAct)
 
   def _createToolBar(self):
-    self.toolbar = self.addToolBar("test")
+    self.toolbar = self.addToolBar('test')
     self.toolbar.setMovable(False)
     self.toolbar.addAction(self.eraseAct)
     self.toolbar.addAction(self.fillWhiteAct)
@@ -84,7 +84,7 @@ class StackMaker(QMainWindow):
     self._createToolBar()
 
     statusbar = self.statusBar()
-    statusbar.setStyleSheet("QStatusBar{border-top: 1px outset grey;}")
+    statusbar.setStyleSheet('QStatusBar{border-top: 1px outset grey;}')
 
     self.resize(768, 720 + self.statusBar().sizeHint().height() + self.menuBar().sizeHint().height() + self.toolbar.height())
     self.center()
@@ -99,7 +99,7 @@ class StackMaker(QMainWindow):
     self.show()
 
   def center(self):
-    """centers the window on the screen"""
+    '''centers the window on the screen'''
 
     screen = QDesktopWidget().screenGeometry()
     size = self.geometry()
@@ -121,24 +121,18 @@ class StackMaker(QMainWindow):
 
     clipboard.setImage(board)
     painter.end()
-    self.statusBar().showMessage("Copied!", 500)
+    self.statusBar().showMessage('Copied!', 500)
 
   def toggleMirror(self):
     self.scene.ocrHandler.socket.blockSignals(not self.scene.ocrHandler.socket.signalsBlocked())
 
-  def doStuff(self):
-    type = (1 + self.scene.cells[0][0].state) % 4
-    for i in range(0, 20):
-      for j in range(0, 10):
-        self.scene.setCell(i,j,type)
-
   def enableTracking(self):
     if not self.scene.ocrHandler.connected:
-      print("Awaiting connection...")
+      print('Awaiting connection...')
       self.scene.ocrHandler.listen(QHostAddress.LocalHost, 3338)
       self.toggleMirrorAct.setEnabled(True)
     else:
-      print("Disconnecting")
+      print('Disconnecting')
       self.scene.ocrHandler.exit()
       self.toggleMirrorAct.setEnabled(False)
 

@@ -18,7 +18,7 @@ class OcrHandler(QTcpServer):
   def onConnected(self):
     self.socket = self.nextPendingConnection()
     self.socket.readyRead.connect(self.parse)
-    print("Connected!")
+    print('Connected!')
     self.connected = True
     self.close()
 
@@ -26,12 +26,12 @@ class OcrHandler(QTcpServer):
     self.connected = False
     self.socket.close()
     self.socket.readyRead.disconnect(self.parse)
-    print("Disconnecting")
+    print('Disconnecting')
 
   # @src.debug.runtime
   def parse(self):
     # print('Connected by', addr)
-    # print("test")
+    # print('test')
     # Get JSON data
     data = self.socket.readAll()
     # Parse size and board state
@@ -50,14 +50,14 @@ class OcrHandler(QTcpServer):
       self.dataBuffer = self.dataBuffer[target_idx:]
       # counter += 1
     # if debug:
-    #   print(str(counter) + " packets processed")
+    #   print(str(counter) + ' packets processed')
     if msg != b'':
       self.doStuff(json.loads(str(msg, 'utf-8')))
 
   # Process data
   def doStuff(self, game):
     field = game['field']
-    for i in range(0, 20):
-      for j in range(0, 10):
+    for i in range(20):
+      for j in range(10):
         type = int(field[i * 10 + j])
         self.cells[i][j].setState(type)
