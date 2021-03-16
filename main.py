@@ -6,8 +6,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtNetwork import *
 
-from src.board import Board
-import src.debug
+from src.scene import Scene
 
 class StackMaker(QMainWindow):
   def __init__(self, *args, **kwargs):
@@ -90,7 +89,7 @@ class StackMaker(QMainWindow):
     self.center()
     self.setWindowTitle('Stackmaker')
 
-    self.scene = Board(10, 20)
+    self.scene = Scene(10, 20)
 
     self.view = QGraphicsView(self.scene)
     self.view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)

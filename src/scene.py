@@ -1,19 +1,19 @@
 from PyQt5.QtWidgets import QGraphicsScene
 from PyQt5.QtGui import QPixmap, QTransform
 
-from .tiles import Cell, Digit
+from .tile import Cell, Digit
 from .connect import OcrHandler
 
 
-class Board(QGraphicsScene):
+class Scene(QGraphicsScene):
   def __init__(self, width, height, *args, **kwargs):
     self.width = width
     self.height = height
     super().__init__(*args, **kwargs)
-    self.initBoard()
+    self.initScene()
     self.ocrHandler = OcrHandler(self.cells)
 
-  def initBoard(self):
+  def initScene(self):
     self.setSceneRect(0,0,256,240)
     bgImage = QPixmap('./assets/boardLayout.png')
     bgImage = bgImage.scaled(bgImage.width(), bgImage.height())
