@@ -19,7 +19,7 @@ class Board(QGraphicsScene):
     bgImage = bgImage.scaled(bgImage.width(), bgImage.height())
     self.image = self.addPixmap(bgImage)
     tile = QPixmap('./assets/tile0.png')
-    self.cells = [[Cell(j, i, tile) for j in range(self.width)] for i in range(self.height)]
+    self.cells = [[Cell(j, i) for j in range(self.width)] for i in range(self.height)]
     for i in range(self.height):
       for j in range(self.width):
         self.cells[i][j].setOffset((12+j)*8, (6+i)*8)
@@ -28,8 +28,8 @@ class Board(QGraphicsScene):
     self.cellType = 1
     self.drawMode = False
 
-    self.top = [Digit(QPixmap('./assets/0.png')) for i in range(6)]
-    self.score = [Digit(QPixmap('./assets/0.png')) for i in range(6)]
+    self.top = [Digit(0) for i in range(6)]
+    self.score = [Digit(0) for i in range(6)]
     for i in range(6):
       self.top[i].setOffset((24+i)*8, 5*8)
       self.addItem(self.top[i])
@@ -37,15 +37,19 @@ class Board(QGraphicsScene):
       self.score[i].setOffset((24+i)*8, 8*8)
       self.addItem(self.score[i])
 
-    self.lines = [Digit(QPixmap('./assets/0.png')) for i in range(3)]
+    self.lines = [Digit(0) for i in range(3)]
     for i in range(3):
       self.lines[i].setOffset((19+i)*8, 3*8)
       self.addItem(self.lines[i])
 
-    self.level = [Digit(QPixmap('./assets/0.png')) for i in range(2)]
+    self.level = [Digit(0) for i in range(2)]
     for i in range(2):
       self.level[i].setOffset((26+i)*8, 21*8)
       self.addItem(self.level[i])
+
+    self.stats = Digit(1, 0xFFB53120)
+    self.stats.setOffset((8)*8, 18*8)
+    self.addItem(self.stats)
 
   def setCellType(self, type):
     self.cellType = type
