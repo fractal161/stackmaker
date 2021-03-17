@@ -56,6 +56,12 @@ class Scene(QGraphicsScene):
       self.drawMode = True
       item.setState(self.meta['cellType'])
     super().mousePressEvent(e)
+    if item in self.level.digits:
+      self.meta['level'] = self.level.getValue()
+      self.board.updatePalette()
+
+  def mouseDoubleClickEvent(self, e):
+    self.mousePressEvent(e)
 
   def mouseReleaseEvent(self, e):
     self.drawMode = False

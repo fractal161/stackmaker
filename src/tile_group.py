@@ -21,6 +21,11 @@ class Board():
       for j in range(self.width):
         self.cells[i][j].setTransform(QTransform().translate(x, y))
 
+  def updatePalette(self):
+    for i in range(self.height):
+      for j in range(self.width):
+        self.cells[i][j].updatePalette()
+
   # Accepts a string
   def setCells(self, newCell):
     for i in range(self.height):

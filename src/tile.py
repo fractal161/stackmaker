@@ -40,6 +40,9 @@ class Cell(QGraphicsPixmapItem):
     newCell.setColor(3, Cell.colors[self.meta['level'] % 10][1])
     self.setPixmap(QPixmap(newCell))
 
+  def updatePalette(self):
+    self.setState(self.state, False)
+
   def restoreState(self):
     self.setState(self.oldstate)
 
