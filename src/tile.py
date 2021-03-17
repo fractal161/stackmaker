@@ -1,3 +1,4 @@
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGraphicsPixmapItem
 from PyQt5.QtGui import QPixmap, QImage
 
@@ -19,43 +20,35 @@ class Cell(QGraphicsPixmapItem):
     [0xFFB53120, 0xFFEA9E22]
   ]
 
-  def __init__(self, x, y, level=8):
+  def __init__(self, x, y, meta):
     super().__init__()
     self.state = 0
+    self.oldstate = 0
     self.x = x
     self.y = y
-    self.level = level
+    self.meta = meta
     self.setState(self.state)
     self.setAcceptHoverEvents(True)
     # self.setFlags(QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsFocusable)
 
-  def setState(self, state):
+  def setState(self, state, backup=True):
+    if backup:
+      self.oldstate = self.state
     self.state = state
     newCell = Cell.tiles[state].copy()
-    newCell.setColor(2, Cell.colors[self.level % 10][0])
-    newCell.setColor(3, Cell.colors[self.level % 10][1])
+    newCell.setColor(2, Cell.colors[self.meta['level'] % 10][0])
+    newCell.setColor(3, Cell.colors[self.meta['level'] % 10][1])
     self.setPixmap(QPixmap(newCell))
 
-  def setLevel(self, level):
-    self.level = level
-    setState(self.state)
-
-  def toggleState(self):
-    if self.state:
-      self.setPixmap(QPixmap('./assets/tile0.png'))
-      self.state = 0
-    else:
-      self.setPixmap(QPixmap('./assets/tile1.png'))
-      self.state = 1
+  def restoreState(self):
+    self.setState(self.oldstate)
 
   # Need to figure out how to handle this
   def hoverEnterEvent(self, e):
-    if not self.state:
-      self.setPixmap(QPixmap('./assets/tile1.png'))
+    self.setState(self.meta['cellType'])
 
   def hoverLeaveEvent(self, e):
-    if not self.state:
-      self.setPixmap(QPixmap('./assets/tile0.png'))
+    self.restoreState()
 
 class Digit(QGraphicsPixmapItem):
   numbers = []
@@ -68,10 +61,17 @@ class Digit(QGraphicsPixmapItem):
     self.state = state
     self.color = color
     self.setState(self.state)
-    self.setAcceptHoverEvents(True)
 
   def setState(self, state):
     self.state = state
     newDigit = Digit.numbers[state].copy()
     newDigit.setColor(0, self.color)
     self.setPixmap(QPixmap(newDigit))
+
+  def mousePressEvent(self, e):
+    if e.button() == Qt.LeftButton and self.state < 9:
+      self.state += 1
+      self.setState(self.state)
+    if e.button() == Qt.RightButton and self.state > 0:
+      self.state -= 1
+      self.setState(self.state)

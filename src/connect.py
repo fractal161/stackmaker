@@ -6,9 +6,9 @@ from random import randint
 import src.debug
 
 class OcrHandler(QTcpServer):
-  def __init__(self, cells, *args, **kwargs):
+  def __init__(self, board, *args, **kwargs):
     super().__init__(*args, **kwargs)
-    self.cells = cells
+    self.cells = board.cells
     self.HOST = 'localhost'
     self.PORT = 3338
     self.dataBuffer = b''
