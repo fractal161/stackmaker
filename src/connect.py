@@ -6,14 +6,15 @@ from random import randint
 import src.debug
 
 class OcrHandler(QTcpServer):
-  def __init__(self, board, *args, **kwargs):
+  def __init__(self, scene, *args, **kwargs):
     super().__init__(*args, **kwargs)
-    self.cells = board.cells
+    self.scene = scene
     self.HOST = 'localhost'
     self.PORT = 3338
     self.dataBuffer = b''
     self.connected = False
     self.newConnection.connect(self.onConnected)
+    self.lastField = ''
 
   def onConnected(self):
     self.socket = self.nextPendingConnection()
@@ -26,13 +27,8 @@ class OcrHandler(QTcpServer):
     self.connected = False
     self.socket.close()
     self.socket.readyRead.disconnect(self.parse)
-    print('Disconnecting')
 
-  # @src.debug.runtime
   def parse(self):
-    # print('Connected by', addr)
-    # print('test')
-    # Get JSON data
     data = self.socket.readAll()
     # Parse size and board state
     self.dataBuffer += data
@@ -52,12 +48,14 @@ class OcrHandler(QTcpServer):
     # if debug:
     #   print(str(counter) + ' packets processed')
     if msg != b'':
-      self.doStuff(json.loads(str(msg, 'utf-8')))
+      self.updateScene(json.loads(str(msg, 'utf-8')))
 
   # Process data
-  def doStuff(self, game):
-    field = game['field']
-    for i in range(20):
-      for j in range(10):
-        type = int(field[i * 10 + j])
-        self.cells[i][j].setState(type)
+  def updateScene(self, game):
+    if self.lastField is not game['field']:
+      self.scene.level.setValue(int(game['level']))
+      self.scene.meta['level'] = int(game['level'])
+      self.scene.score.setValue(int(game['score']))
+      self.scene.lines.setValue(int(game['lines']))
+      self.scene.board.setCells(game['field'])
+    self.lastField = game['field']

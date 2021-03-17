@@ -27,10 +27,10 @@ class Board():
         self.cells[i][j].updatePalette()
 
   # Accepts a string
-  def setCells(self, newCell):
+  def setCells(self, newCells):
     for i in range(self.height):
       for j in range(self.width):
-        newState = int(newCell[i * self.width + j])
+        newState = int(newCells[i * self.width + j])
         self.cells[i][j].setState(newState)
 
 class Number():

@@ -17,7 +17,7 @@ class Scene(QGraphicsScene):
     super().__init__(*args, **kwargs)
     self.initScene()
     # Gonna be weird for a bit
-    self.ocrHandler = OcrHandler(self.board)
+    self.ocrHandler = OcrHandler(self)
 
   def initScene(self):
     self.setSceneRect(0,0,256,240)
