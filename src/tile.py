@@ -47,11 +47,17 @@ class Cell(QGraphicsPixmapItem):
     self.setState(self.oldstate)
 
   # Need to figure out how to handle this
-  def hoverEnterEvent(self, e):
-    self.setState(self.meta['cellType'])
-
-  def hoverLeaveEvent(self, e):
-    self.restoreState()
+  # def hoverEnterEvent(self, e):
+  #   # print("Hover pos", e.scenePos())
+  #   # print(self.sceneBoundingRect())
+  #   # print(self.contains(e.scenePos()))
+  #   # print(self.isUnderMouse())
+  #   # print()
+  #   self.setState(self.meta['cellType'])
+  #   self.setPixmap(QPixmap('./assets/tileempty.png'))
+  #
+  # def hoverLeaveEvent(self, e):
+  #   self.restoreState()
 
 class Digit(QGraphicsPixmapItem):
   numbers = []

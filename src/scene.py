@@ -3,6 +3,7 @@ from PyQt5.QtGui import QPixmap, QTransform
 
 from .tile import Cell, Digit
 from .tile_group import Board, Number
+from .cursor_item import CursorItem
 from .connect import OcrHandler
 
 
@@ -45,13 +46,25 @@ class Scene(QGraphicsScene):
       statNum.translate(6 * 8, (12 + 2 * i) * 8)
       self.stats.append(statNum)
 
+    self.cursor = CursorItem(0, self.meta)
+    self.addItem(self.cursor)
+    self.cursor.setVisible(False)
     self.drawMode = False
 
   def setCellType(self, type):
     self.meta['cellType'] = type
 
+  def itemAtMouse(self, pos):
+    itemList = self.items(pos)
+    for item in itemList:
+      if item != self.cursor:
+        return item
+    return None
+
   def mousePressEvent(self, e):
-    item = self.itemAt(e.scenePos(), QTransform())
+    # print(e.scenePos())
+    # item = self.itemAt(e.scenePos(), QTransform())
+    item = self.itemAtMouse(e.scenePos())
     if isinstance(item, Cell):
       self.drawMode = True
       item.setState(self.meta['cellType'])
@@ -69,8 +82,21 @@ class Scene(QGraphicsScene):
 
   # Potentially inefficient, but seems fine for now
   def mouseMoveEvent(self, e):
+    # print(e.scenePos())
+    mouseX, mouseY = 8*(e.scenePos().x() // 8), 8*(e.scenePos().y() // 8)
+    if mouseX in range(12*8,12*8+10*8,8) and mouseY in range(6*8,6*8+20*8,8):
+      self.cursor.setVisible(True)
+      self.cursor.updateOffset(mouseX, mouseY)
+    else:
+      self.cursor.setVisible(False)
+    # This usually works
+    # item = self.items(e.scenePos())[1]
+    item = self.itemAtMouse(e.scenePos())
+    # item = self.itemAt(e.scenePos(), QTransform())
+    # if item is not None:
+    #   print(item.boundingBox())
     if self.drawMode:
-      item = self.itemAt(e.scenePos(), QTransform())
+      # item = self.itemAtMouse(e.scenePos())
       if isinstance(item, Cell):
         item.setState(self.meta['cellType'])
     super().mouseMoveEvent(e)
