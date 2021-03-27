@@ -1,3 +1,5 @@
+import os
+
 from PyQt5.QtWidgets import QGraphicsScene
 from PyQt5.QtGui import QPixmap, QTransform
 
@@ -21,8 +23,9 @@ class Scene(QGraphicsScene):
     self.ocrHandler = OcrHandler(self)
 
   def initScene(self):
+    main_path = os.path.dirname(__file__)
     self.setSceneRect(0,0,256,240)
-    bgImage = QPixmap('./assets/boardLayout.png')
+    bgImage = QPixmap(os.path.join(os.path.dirname(__file__), '../assets/boardLayout.png'))
     self.image = self.addPixmap(bgImage)
 
     self.board = Board(self, 10, 20, self.meta)

@@ -1,6 +1,7 @@
 #!/usr/bin/python3
-
+import os
 import sys
+
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
@@ -14,33 +15,35 @@ class StackMaker(QMainWindow):
     self.initUI()
 
   def _createActions(self):
+    main_path = os.path.dirname(__file__)
+
     # https://realpython.com/python-menus-toolbars/ for menu stuff later
-    self.exitAct = QAction(QIcon('./assets/icons/exit.png'), '&Exit', self)
+    self.exitAct = QAction(QIcon(os.path.join(main_path, './assets/icons/exit.png')), '&Exit', self)
     self.exitAct.setShortcut('Ctrl+Q')
     self.exitAct.setStatusTip('Exit application')
     self.exitAct.triggered.connect(qApp.quit)
 
-    self.copyAct = QAction(QIcon('./assets/icons/copy.png'), '&Copy', self)
+    self.copyAct = QAction(QIcon(os.path.join(main_path, './assets/icons/copy.png')), '&Copy', self)
     self.copyAct.setShortcut('Ctrl+C')
     self.copyAct.setStatusTip('Copy entire board')
     self.copyAct.triggered.connect(self.copy)
 
-    self.eraseAct = QAction(QIcon(QPixmap('./assets/tile0.png').scaled(16, 16)), '&Erase', self)
+    self.eraseAct = QAction(QIcon(QPixmap(os.path.join(main_path, './assets/tile0.png')).scaled(16, 16)), '&Erase', self)
     self.eraseAct.setShortcut('e')
     self.eraseAct.setStatusTip('Erase cell')
     self.eraseAct.triggered.connect(lambda : self.scene.setCellType(0))
 
-    self.fillWhiteAct = QAction(QIcon(QPixmap('./assets/tile1.png').scaled(16, 16)), '&White Cell', self)
+    self.fillWhiteAct = QAction(QIcon(QPixmap(os.path.join(main_path, './assets/tile1.png')).scaled(16, 16)), '&White Cell', self)
     self.fillWhiteAct.setShortcut('1')
     self.fillWhiteAct.setStatusTip('Paint the white cell')
     self.fillWhiteAct.triggered.connect(lambda : self.scene.setCellType(1))
 
-    self.fillLightAct = QAction(QIcon(QPixmap('./assets/tile2.png').scaled(16, 16)), '&Light Cell', self)
+    self.fillLightAct = QAction(QIcon(QPixmap(os.path.join(main_path, './assets/tile2.png')).scaled(16, 16)), '&Light Cell', self)
     self.fillLightAct.setShortcut('2')
     self.fillLightAct.setStatusTip('Paint the light cell')
     self.fillLightAct.triggered.connect(lambda : self.scene.setCellType(2))
 
-    self.fillDarkAct = QAction(QIcon(QPixmap('./assets/tile3.png').scaled(16, 16)), '&Dark Cell', self)
+    self.fillDarkAct = QAction(QIcon(QPixmap(os.path.join(main_path, './assets/tile3.png')).scaled(16, 16)), '&Dark Cell', self)
     self.fillDarkAct.setShortcut('3')
     self.fillDarkAct.setStatusTip('Paint the dark cell')
     self.fillDarkAct.triggered.connect(lambda : self.scene.setCellType(3))
