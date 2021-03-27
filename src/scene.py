@@ -15,7 +15,7 @@ class Scene(QGraphicsScene):
     self.height = height
     self.meta = {
       'level' : 18,
-      'cellType' : 1
+      'cellState' : 1
     }
     super().__init__(*args, **kwargs)
     self.initScene()
@@ -54,8 +54,9 @@ class Scene(QGraphicsScene):
     self.cursor.setVisible(False)
     self.drawMode = False
 
-  def setCellType(self, type):
-    self.meta['cellType'] = type
+  def setCellState(self, state):
+    self.meta['cellState'] = state
+    self.cursor.setType(state)
 
   def itemAtMouse(self, pos):
     itemList = self.items(pos)
@@ -65,16 +66,15 @@ class Scene(QGraphicsScene):
     return None
 
   def mousePressEvent(self, e):
-    # print(e.scenePos())
-    # item = self.itemAt(e.scenePos(), QTransform())
     item = self.itemAtMouse(e.scenePos())
     if isinstance(item, Cell):
       self.drawMode = True
-      item.setState(self.meta['cellType'])
+      item.setState(self.meta['cellState'])
     super().mousePressEvent(e)
     if item in self.level.digits:
       self.meta['level'] = self.level.getValue()
       self.board.updatePalette()
+      self.cursor.updatePalette()
 
   def mouseDoubleClickEvent(self, e):
     self.mousePressEvent(e)
@@ -85,7 +85,6 @@ class Scene(QGraphicsScene):
 
   # Potentially inefficient, but seems fine for now
   def mouseMoveEvent(self, e):
-    # print(e.scenePos())
     mouseX, mouseY = 8*(e.scenePos().x() // 8), 8*(e.scenePos().y() // 8)
     if mouseX in range(12*8,12*8+10*8,8) and mouseY in range(6*8,6*8+20*8,8):
       self.cursor.setVisible(True)
@@ -93,13 +92,11 @@ class Scene(QGraphicsScene):
     else:
       self.cursor.setVisible(False)
     # This usually works
-    # item = self.items(e.scenePos())[1]
     item = self.itemAtMouse(e.scenePos())
-    # item = self.itemAt(e.scenePos(), QTransform())
     # if item is not None:
     #   print(item.boundingBox())
     if self.drawMode:
       # item = self.itemAtMouse(e.scenePos())
       if isinstance(item, Cell):
-        item.setState(self.meta['cellType'])
+        item.setState(self.meta['cellState'])
     super().mouseMoveEvent(e)

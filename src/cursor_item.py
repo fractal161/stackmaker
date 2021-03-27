@@ -22,13 +22,20 @@ class CursorItem(QGraphicsItem):
     self.boundingRect()
     self.meta = meta
 
+  def setType(self, type):
+    # self.prepareGeometryChange()
+    for item in self.items:
+      item.setState(type)
+    self.update()
+
+  def updatePalette(self):
+    for item in self.items:
+      item.updatePalette()
+
+
   def updateOffset(self, x, y):
     # self.prepareGeometryChange()
     self.setTransform(QTransform().translate(x, y))
-
-  def updateItemType(self, type):
-    # self.prepareGeometryChange()
-    pass
 
   def paint(self, painter, option, widget):
     for tile in self.items:

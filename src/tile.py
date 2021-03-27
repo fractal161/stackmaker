@@ -58,7 +58,7 @@ class Cell(QGraphicsPixmapItem):
   #   # print(self.contains(e.scenePos()))
   #   # print(self.isUnderMouse())
   #   # print()
-  #   self.setState(self.meta['cellType'])
+  #   self.setState(self.meta['cellState'])
   #   self.setPixmap(QPixmap('./assets/tileempty.png'))
   #
   # def hoverLeaveEvent(self, e):

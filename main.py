@@ -31,22 +31,22 @@ class StackMaker(QMainWindow):
     self.eraseAct = QAction(QIcon(QPixmap(os.path.join(main_path, './assets/tile0.png')).scaled(16, 16)), '&Erase', self)
     self.eraseAct.setShortcut('e')
     self.eraseAct.setStatusTip('Erase cell')
-    self.eraseAct.triggered.connect(lambda : self.scene.setCellType(0))
+    self.eraseAct.triggered.connect(lambda : self.scene.setCellState(0))
 
     self.fillWhiteAct = QAction(QIcon(QPixmap(os.path.join(main_path, './assets/tile1.png')).scaled(16, 16)), '&White Cell', self)
     self.fillWhiteAct.setShortcut('1')
     self.fillWhiteAct.setStatusTip('Paint the white cell')
-    self.fillWhiteAct.triggered.connect(lambda : self.scene.setCellType(1))
+    self.fillWhiteAct.triggered.connect(lambda : self.scene.setCellState(1))
 
     self.fillLightAct = QAction(QIcon(QPixmap(os.path.join(main_path, './assets/tile2.png')).scaled(16, 16)), '&Light Cell', self)
     self.fillLightAct.setShortcut('2')
     self.fillLightAct.setStatusTip('Paint the light cell')
-    self.fillLightAct.triggered.connect(lambda : self.scene.setCellType(2))
+    self.fillLightAct.triggered.connect(lambda : self.scene.setCellState(2))
 
     self.fillDarkAct = QAction(QIcon(QPixmap(os.path.join(main_path, './assets/tile3.png')).scaled(16, 16)), '&Dark Cell', self)
     self.fillDarkAct.setShortcut('3')
     self.fillDarkAct.setStatusTip('Paint the dark cell')
-    self.fillDarkAct.triggered.connect(lambda : self.scene.setCellType(3))
+    self.fillDarkAct.triggered.connect(lambda : self.scene.setCellState(3))
 
     self.connectStatusAct = QAction(QIcon(), '&Enable/Disable', self)
     self.connectStatusAct.triggered.connect(self.enableTracking)
