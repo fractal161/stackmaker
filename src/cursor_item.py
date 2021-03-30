@@ -46,19 +46,9 @@ class CursorItem(QGraphicsItem):
   def __init__(self, type, meta, *args, **kwargs):
     super().__init__(*args, **kwargs)
     self.type = type
-    self.items = [Cell(0, 0, meta)]
-    self.items[0].setState(1)
-    # self.items[1].setState(1)
-    # self.items[1].setOffset(8,0)
-    # self.items[2].setState(1)
-    # self.items[2].setOffset(-8,0)
-    # self.items[3].setState(1)
-    # self.items[3].setOffset(0,8)
-
-    # print(self.items[0].boundingRect())
-    # print(self.items[1].boundingRect())
-    self.boundingRect()
     self.meta = meta
+    self.setType(self.type)
+    self.boundingRect()
 
   # For now, the int type represents a single cell, and a tuple represents a piece/orientation
   def setType(self, type):
@@ -68,6 +58,7 @@ class CursorItem(QGraphicsItem):
     if isinstance(type, int):
       item = Cell(0, 0, self.meta)
       item.setState(type)
+      item.setOpacity(127)
       self.items.append(item)
     else:
       state = CursorItem.pieceStates[type[0]]
@@ -75,6 +66,7 @@ class CursorItem(QGraphicsItem):
         item = Cell(0, 0, self.meta)
         item.setState(state)
         item.setOffset(8 * coord[0], 8 * coord[1])
+        item.setOpacity(127)
         self.items.append(item)
     self.update()
 

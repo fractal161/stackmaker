@@ -36,6 +36,13 @@ class Cell(QGraphicsPixmapItem):
     self.setAcceptHoverEvents(True)
     # self.setFlags(QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsFocusable)
 
+  def setOpacity(self, opacity):
+    newCell = Cell.tiles[self.state].copy()
+    newCell.setColor(2, Cell.colors[self.meta['level'] % 10][0])
+    newCell.setColor(3, Cell.colors[self.meta['level'] % 10][1])
+    newCell.setColorTable([color & ((opacity << 24) | 0x00FFFFFF) for color in newCell.colorTable()])
+    self.setPixmap(QPixmap(newCell))
+
   def setState(self, state, backup=True):
     if backup:
       self.oldstate = self.state

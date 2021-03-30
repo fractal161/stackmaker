@@ -49,7 +49,7 @@ class Scene(QGraphicsScene):
       statNum.translate(6 * 8, (12 + 2 * i) * 8)
       self.stats.append(statNum)
 
-    self.cursor = CursorItem(0, self.meta)
+    self.cursor = CursorItem(1, self.meta)
     self.addItem(self.cursor)
     self.cursor.setVisible(False)
     self.drawMode = False
