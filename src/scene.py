@@ -68,8 +68,19 @@ class Scene(QGraphicsScene):
   def mousePressEvent(self, e):
     item = self.itemAtMouse(e.scenePos())
     if isinstance(item, Cell):
-      self.drawMode = True
-      item.setState(self.meta['cellState'])
+      # Drawing a single tile
+      if isinstance(self.cursor.type, int):
+        self.drawMode = True
+        item.setState(self.meta['cellState'])
+      #Drawing a piece, so need to drag stuff
+      else:
+        mouseX, mouseY = int((e.scenePos().x() // 8)-12), int((e.scenePos().y() // 8)-6)
+        for coord in self.cursor.getCoords():
+          tmpX = mouseX + coord[0]
+          tmpY = mouseY + coord[1]
+          if tmpY in range(20) and tmpX in range(10):
+            self.board.cells[tmpY][tmpX].setState(self.cursor.getState())
+
     super().mousePressEvent(e)
     if item in self.level.digits:
       self.meta['level'] = self.level.getValue()

@@ -52,7 +52,7 @@ class OcrHandler(QTcpServer):
 
   # Process data
   def updateScene(self, game):
-    if self.lastField is not game['field']:
+    if self.lastField != game['field']:
       self.scene.level.setValue(int(game['level']))
       self.scene.meta['level'] = int(game['level'])
       self.scene.score.setValue(int(game['score']))

@@ -48,6 +48,18 @@ class StackMaker(QMainWindow):
     self.fillDarkAct.setStatusTip('Paint the dark cell')
     self.fillDarkAct.triggered.connect(lambda : self.scene.setCellState(3))
 
+    pieceNames = ['T','J','Z','O','S','L','I']
+    self.pieceActs = []
+    for i in range(7):
+      pieceAct = QAction(QIcon(QPixmap(os.path.join(main_path, f'./assets/{pieceNames[i]}.png')).scaled(16, 16)), pieceNames[i], self)
+      pieceAct.setShortcut(pieceNames[i])
+      pieceAct.setStatusTip(f'Draw the {pieceNames[i]} piece')
+      # Ugly solution but it works
+      # pieceAct.triggered.connect(lambda x=False,i=i: print(f'Selected {pieceNames[i]}'))
+      pieceAct.triggered.connect(lambda x=False,i=i: self.scene.cursor.setType((i, 0)))
+      # pieceAct.triggered.connect(lambda *args: print(args))
+      self.pieceActs.append(pieceAct)
+
     self.connectStatusAct = QAction(QIcon(), '&Enable/Disable', self)
     self.connectStatusAct.triggered.connect(self.enableTracking)
 
@@ -67,6 +79,8 @@ class StackMaker(QMainWindow):
     editMenu.addAction(self.fillWhiteAct)
     editMenu.addAction(self.fillLightAct)
     editMenu.addAction(self.fillDarkAct)
+    for i in range(7):
+      editMenu.addAction(self.pieceActs[i])
 
     connectMenu = menubar.addMenu('&Connect')
     connectMenu.addAction(self.connectStatusAct)

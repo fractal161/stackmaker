@@ -5,6 +5,44 @@ from .tile import Cell
 from .piece import Piece
 
 class CursorItem(QGraphicsItem):
+  pieceStates = [1, 2, 3, 1, 2, 3, 1]
+  coords = [
+    [
+      [[0, 1], [0, 0], [1, 0], [-1, 0]],
+      [[0, 1], [0, 0], [1, 0], [0, -1]],
+      [[-1, 0], [0, 0], [1, 0], [0, -1]],
+      [[0, 1], [0, 0], [0, -1], [-1, 0]]
+    ],
+    [
+      [[-1, 0], [0, 0], [1, 0], [1, 1]],
+      [[0, -1], [1, -1], [0, 0], [0, 1]],
+      [[-1, -1], [-1, 0], [0, 0], [1, 0]],
+      [[0, -1], [0, 0], [-1, 1], [0, 1]]
+    ],
+    [
+      [[-1, 0], [0, 0], [0, 1], [1, 1]],
+      [[1, -1], [0, 0], [1, 0], [0, 1]]
+    ],
+    [
+      [[-1, 0], [0, 0], [-1, 1], [0, 1]]
+    ],
+    [
+      [[0, 0], [1, 0], [-1, 1], [0, 1]],
+      [[0, -1], [0, 0], [1, 0], [1, 1]]
+    ],
+    [
+    [
+      [-1, 0], [0, 0], [1, 0], [-1, 1]],
+      [[0, -1], [0, 0], [0, 1], [1, 1]],
+      [[1, -1], [-1, 0], [0, 0], [1, 0]],
+      [[-1, -1], [0, -1], [0, 0], [0, 1]]
+    ],
+    [
+      [[-2, 0], [-1, 0], [0, 0], [1, 0]],
+      [[0, -2], [0, -1], [0, 0], [0, 1]]
+    ]
+  ]
+
   def __init__(self, type, meta, *args, **kwargs):
     super().__init__(*args, **kwargs)
     self.type = type
@@ -22,11 +60,33 @@ class CursorItem(QGraphicsItem):
     self.boundingRect()
     self.meta = meta
 
+  # For now, the int type represents a single cell, and a tuple represents a piece/orientation
   def setType(self, type):
-    # self.prepareGeometryChange()
-    for item in self.items:
+    self.prepareGeometryChange()
+    self.type = type
+    self.items = []
+    if isinstance(type, int):
+      item = Cell(0, 0, self.meta)
       item.setState(type)
+      self.items.append(item)
+    else:
+      state = CursorItem.pieceStates[type[0]]
+      for coord in CursorItem.coords[type[0]][type[1]]:
+        item = Cell(0, 0, self.meta)
+        item.setState(state)
+        item.setOffset(8 * coord[0], 8 * coord[1])
+        self.items.append(item)
     self.update()
+
+  def getCoords(self):
+    if isinstance(self.type, int):
+      return None
+    return CursorItem.coords[self.type[0]][self.type[1]]
+
+  def getState(self):
+    if isinstance(self.type, int):
+      return self.type
+    return CursorItem.pieceStates[self.type[0]]
 
   def updatePalette(self):
     for item in self.items:
