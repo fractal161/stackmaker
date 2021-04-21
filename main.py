@@ -28,37 +28,79 @@ class StackMaker(QMainWindow):
     self.copyAct.setStatusTip('Copy entire board')
     self.copyAct.triggered.connect(self.copy)
 
+    self.ccwAct = QAction(QIcon(), '&Counterclockwise')
+    self.ccwAct.setShortcut('C')
+    self.ccwAct.setStatusTip('Rotate counterclockwise')
+    self.ccwAct.setEnabled(False)
+    self.ccwAct.triggered.connect(self.scene.cursor.ccw)
+
+    self.cwAct = QAction(QIcon(), '&Clockwise')
+    self.cwAct.setShortcut('V')
+    self.cwAct.setStatusTip('Rotate clockwise')
+    self.cwAct.setEnabled(False)
+    self.cwAct.triggered.connect(self.scene.cursor.cw)
+
+    pieceNames = ['T','J','Z','O','S','L','I']
+    self.pieceActs = QActionGroup(self)
+    for i in range(7):
+      pieceAct = QAction(QIcon(QPixmap(os.path.join(main_path, f'./assets/{pieceNames[i]}.png'))), pieceNames[i], self)
+      pieceAct.setShortcut(pieceNames[i])
+      pieceAct.setStatusTip(f'Draw the {pieceNames[i]} piece')
+      pieceAct.setCheckable(True)
+      # Ugly solution but it works
+      pieceAct.triggered.connect(lambda x=False,i=i: self.scene.cursor.setType([i, 0]))
+      pieceAct.triggered.connect(lambda : self.ccwAct.setEnabled(True))
+      pieceAct.triggered.connect(lambda : self.cwAct.setEnabled(True))
+      self.pieceActs.addAction(pieceAct)
+
+    self.cellActs = QActionGroup(self)
+
     self.eraseAct = QAction(QIcon(QPixmap(os.path.join(main_path, './assets/tile0.png')).scaled(16, 16)), '&Erase', self)
     self.eraseAct.setShortcut('e')
     self.eraseAct.setStatusTip('Erase cell')
+    self.eraseAct.setCheckable(True)
     self.eraseAct.triggered.connect(lambda : self.scene.setCellState(0))
+    self.eraseAct.triggered.connect(lambda : self.ccwAct.setEnabled(False))
+    self.eraseAct.triggered.connect(lambda : self.cwAct.setEnabled(False))
+    self.cellActs.addAction(self.eraseAct)
 
     self.fillWhiteAct = QAction(QIcon(QPixmap(os.path.join(main_path, './assets/tile1.png')).scaled(16, 16)), '&White Cell', self)
     self.fillWhiteAct.setShortcut('1')
     self.fillWhiteAct.setStatusTip('Paint the white cell')
+    self.fillWhiteAct.setCheckable(True)
+    self.fillWhiteAct.setChecked(True)
     self.fillWhiteAct.triggered.connect(lambda : self.scene.setCellState(1))
+    self.fillWhiteAct.triggered.connect(lambda : self.ccwAct.setEnabled(False))
+    self.fillWhiteAct.triggered.connect(lambda : self.cwAct.setEnabled(False))
+    self.cellActs.addAction(self.fillWhiteAct)
 
     self.fillLightAct = QAction(QIcon(QPixmap(os.path.join(main_path, './assets/tile2.png')).scaled(16, 16)), '&Light Cell', self)
     self.fillLightAct.setShortcut('2')
     self.fillLightAct.setStatusTip('Paint the light cell')
+    self.fillLightAct.setCheckable(True)
     self.fillLightAct.triggered.connect(lambda : self.scene.setCellState(2))
+    self.fillLightAct.triggered.connect(lambda : self.ccwAct.setEnabled(False))
+    self.fillLightAct.triggered.connect(lambda : self.cwAct.setEnabled(False))
+    self.cellActs.addAction(self.fillLightAct)
 
     self.fillDarkAct = QAction(QIcon(QPixmap(os.path.join(main_path, './assets/tile3.png')).scaled(16, 16)), '&Dark Cell', self)
     self.fillDarkAct.setShortcut('3')
     self.fillDarkAct.setStatusTip('Paint the dark cell')
+    self.fillDarkAct.setCheckable(True)
     self.fillDarkAct.triggered.connect(lambda : self.scene.setCellState(3))
+    self.fillDarkAct.triggered.connect(lambda : self.ccwAct.setEnabled(False))
+    self.fillDarkAct.triggered.connect(lambda : self.cwAct.setEnabled(False))
+    self.cellActs.addAction(self.fillDarkAct)
 
-    pieceNames = ['T','J','Z','O','S','L','I']
-    self.pieceActs = []
-    for i in range(7):
-      pieceAct = QAction(QIcon(QPixmap(os.path.join(main_path, f'./assets/{pieceNames[i]}.png')).scaled(16, 16)), pieceNames[i], self)
-      pieceAct.setShortcut(pieceNames[i])
-      pieceAct.setStatusTip(f'Draw the {pieceNames[i]} piece')
-      # Ugly solution but it works
-      # pieceAct.triggered.connect(lambda x=False,i=i: print(f'Selected {pieceNames[i]}'))
-      pieceAct.triggered.connect(lambda x=False,i=i: self.scene.cursor.setType((i, 0)))
-      # pieceAct.triggered.connect(lambda *args: print(args))
-      self.pieceActs.append(pieceAct)
+    self.transparentAct = QAction(QIcon(), '&Transparent')
+    self.transparentAct.setShortcut('Ctrl+V')
+    self.transparentAct.setStatusTip('Draw with transparent cells')
+    self.transparentAct.setCheckable(True)
+
+    self.rgbAct = QAction(QIcon(), '&Option Colors')
+    self.rgbAct.setShortcut('Ctrl+A')
+    self.rgbAct.setStatusTip('Tint drawn objects with varying colors')
+    self.rgbAct.setCheckable(True)
 
     self.connectStatusAct = QAction(QIcon(), '&Enable/Disable', self)
     self.connectStatusAct.triggered.connect(self.enableTracking)
@@ -74,13 +116,22 @@ class StackMaker(QMainWindow):
     fileMenu.addAction(self.exitAct)
     fileMenu.addAction(self.copyAct)
 
-    editMenu = menubar.addMenu('&Edit')
-    editMenu.addAction(self.eraseAct)
-    editMenu.addAction(self.fillWhiteAct)
-    editMenu.addAction(self.fillLightAct)
-    editMenu.addAction(self.fillDarkAct)
-    for i in range(7):
-      editMenu.addAction(self.pieceActs[i])
+    drawMenu = menubar.addMenu('&Draw')
+    drawMenu.addAction(self.eraseAct)
+    drawMenu.addAction(self.fillWhiteAct)
+    drawMenu.addAction(self.fillLightAct)
+    drawMenu.addAction(self.fillDarkAct)
+    # drawMenu.addSeparator()
+    pieceMenu = drawMenu.addMenu('&Piece')
+    for act in self.pieceActs.actions():
+      pieceMenu.addAction(act)
+    pieceMenu.addSeparator()
+    pieceMenu.addAction(self.ccwAct)
+    pieceMenu.addAction(self.cwAct)
+
+    viewMenu = menubar.addMenu('&View')
+    viewMenu.addAction(self.transparentAct)
+    viewMenu.addAction(self.rgbAct)
 
     connectMenu = menubar.addMenu('&Connect')
     connectMenu.addAction(self.connectStatusAct)
@@ -93,8 +144,13 @@ class StackMaker(QMainWindow):
     self.toolbar.addAction(self.fillWhiteAct)
     self.toolbar.addAction(self.fillLightAct)
     self.toolbar.addAction(self.fillDarkAct)
+    self.toolbar.addSeparator()
+    for act in self.pieceActs.actions():
+      self.toolbar.addAction(act)
 
   def initUI(self):
+    self.scene = Scene(10, 20)
+
     self._createActions()
     self._createMenuBar()
     self._createToolBar()
@@ -105,8 +161,6 @@ class StackMaker(QMainWindow):
     self.resize(768, 720 + self.statusBar().sizeHint().height() + self.menuBar().sizeHint().height() + self.toolbar.height())
     self.center()
     self.setWindowTitle('Stackmaker')
-
-    self.scene = Scene(10, 20)
 
     self.view = QGraphicsView(self.scene)
     self.view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)

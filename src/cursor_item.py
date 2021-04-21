@@ -50,7 +50,7 @@ class CursorItem(QGraphicsItem):
     self.setType(self.type)
     self.boundingRect()
 
-  # For now, the int type represents a single cell, and a tuple represents a piece/orientation
+  # For now, the int type represents a single cell, and a list represents a piece/orientation
   def setType(self, type):
     self.prepareGeometryChange()
     self.type = type
@@ -80,14 +80,39 @@ class CursorItem(QGraphicsItem):
       return self.type
     return CursorItem.pieceStates[self.type[0]]
 
+  def cw(self):
+    self.setType([self.type[0], (self.type[1]+1)%len(CursorItem.coords[self.type[0]])])
+
+  def ccw(self):
+    self.setType([self.type[0], (self.type[1]-1)%len(CursorItem.coords[self.type[0]])])
+
   def updatePalette(self):
     for item in self.items:
       item.updatePalette()
-
+      item.setOpacity(127)
 
   def updateOffset(self, x, y):
     # self.prepareGeometryChange()
     self.setTransform(QTransform().translate(x, y))
+
+  # Make cursor item visible with respect to a certain rectangle
+  def setVisible(self, visible, *args):
+    super().setVisible(visible)
+
+  '''
+  This will probably be a massive headache, so let's not worry abt it now
+  def setVisible(self, visible, rect=QRectF()):
+    if not visible:
+      for item in self.items:
+        item.setVisible(False)
+      self.update()
+      return
+    for item in self.items:
+      # print(rect)
+      # print(item.boundingRect())
+      if rect.isNull() or rect.contains(item.sceneBoundingRect()):
+        item.setVisible(True)
+  '''
 
   def paint(self, painter, option, widget):
     for tile in self.items:
@@ -96,9 +121,9 @@ class CursorItem(QGraphicsItem):
 
   def boundingRect(self):
     if len(self.items) == 0:
-      self.bound = QGraphicsRectItem(QRectF(0,0,0,0))
+      self.bound = QGraphicsRectItem(QRectF())
       self.bound.setPen(QPen(Qt.red, 1))
-      return QRectF(0,0,0,0)
+      return QRectF()
     # All items contain the center tile, so this is probably alright
     minx,miny,maxx,maxy=0,0,8,8
     for tile in self.items:
