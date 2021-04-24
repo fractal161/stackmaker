@@ -40,10 +40,12 @@ class StackMaker(QMainWindow):
     self.cwAct.setEnabled(False)
     self.cwAct.triggered.connect(self.scene.cursor.cw)
 
+    self.mainActs = QActionGroup(self)
+
     pieceNames = ['T','J','Z','O','S','L','I']
-    self.pieceActs = QActionGroup(self)
+    self.pieceActs = []
     for i in range(7):
-      pieceAct = QAction(QIcon(QPixmap(os.path.join(main_path, f'./assets/{pieceNames[i]}.png'))), pieceNames[i], self)
+      pieceAct = QAction(QIcon(QPixmap(os.path.join(main_path, f'./assets/{pieceNames[i]}.png'))), pieceNames[i], self.mainActs)
       pieceAct.setShortcut(pieceNames[i])
       pieceAct.setStatusTip(f'Draw the {pieceNames[i]} piece')
       pieceAct.setCheckable(True)
@@ -51,20 +53,20 @@ class StackMaker(QMainWindow):
       pieceAct.triggered.connect(lambda x=False,i=i: self.scene.cursor.setType([i, 0]))
       pieceAct.triggered.connect(lambda : self.ccwAct.setEnabled(True))
       pieceAct.triggered.connect(lambda : self.cwAct.setEnabled(True))
-      self.pieceActs.addAction(pieceAct)
+      self.pieceActs.append(pieceAct)
 
-    self.cellActs = QActionGroup(self)
+    self.cellActs = []
 
-    self.eraseAct = QAction(QIcon(QPixmap(os.path.join(main_path, './assets/tile0.png')).scaled(16, 16)), '&Erase', self)
+    self.eraseAct = QAction(QIcon(QPixmap(os.path.join(main_path, './assets/tile0.png')).scaled(16, 16)), '&Erase', self.mainActs)
     self.eraseAct.setShortcut('e')
     self.eraseAct.setStatusTip('Erase cell')
     self.eraseAct.setCheckable(True)
     self.eraseAct.triggered.connect(lambda : self.scene.setCellState(0))
     self.eraseAct.triggered.connect(lambda : self.ccwAct.setEnabled(False))
     self.eraseAct.triggered.connect(lambda : self.cwAct.setEnabled(False))
-    self.cellActs.addAction(self.eraseAct)
+    self.cellActs.append(self.eraseAct)
 
-    self.fillWhiteAct = QAction(QIcon(QPixmap(os.path.join(main_path, './assets/tile1.png')).scaled(16, 16)), '&White Cell', self)
+    self.fillWhiteAct = QAction(QIcon(QPixmap(os.path.join(main_path, './assets/tile1.png')).scaled(16, 16)), '&White Cell', self.mainActs)
     self.fillWhiteAct.setShortcut('1')
     self.fillWhiteAct.setStatusTip('Paint the white cell')
     self.fillWhiteAct.setCheckable(True)
@@ -72,25 +74,25 @@ class StackMaker(QMainWindow):
     self.fillWhiteAct.triggered.connect(lambda : self.scene.setCellState(1))
     self.fillWhiteAct.triggered.connect(lambda : self.ccwAct.setEnabled(False))
     self.fillWhiteAct.triggered.connect(lambda : self.cwAct.setEnabled(False))
-    self.cellActs.addAction(self.fillWhiteAct)
+    self.cellActs.append(self.fillWhiteAct)
 
-    self.fillLightAct = QAction(QIcon(QPixmap(os.path.join(main_path, './assets/tile2.png')).scaled(16, 16)), '&Light Cell', self)
+    self.fillLightAct = QAction(QIcon(QPixmap(os.path.join(main_path, './assets/tile2.png')).scaled(16, 16)), '&Light Cell', self.mainActs)
     self.fillLightAct.setShortcut('2')
     self.fillLightAct.setStatusTip('Paint the light cell')
     self.fillLightAct.setCheckable(True)
     self.fillLightAct.triggered.connect(lambda : self.scene.setCellState(2))
     self.fillLightAct.triggered.connect(lambda : self.ccwAct.setEnabled(False))
     self.fillLightAct.triggered.connect(lambda : self.cwAct.setEnabled(False))
-    self.cellActs.addAction(self.fillLightAct)
+    self.cellActs.append(self.fillLightAct)
 
-    self.fillDarkAct = QAction(QIcon(QPixmap(os.path.join(main_path, './assets/tile3.png')).scaled(16, 16)), '&Dark Cell', self)
+    self.fillDarkAct = QAction(QIcon(QPixmap(os.path.join(main_path, './assets/tile3.png')).scaled(16, 16)), '&Dark Cell', self.mainActs)
     self.fillDarkAct.setShortcut('3')
     self.fillDarkAct.setStatusTip('Paint the dark cell')
     self.fillDarkAct.setCheckable(True)
     self.fillDarkAct.triggered.connect(lambda : self.scene.setCellState(3))
     self.fillDarkAct.triggered.connect(lambda : self.ccwAct.setEnabled(False))
     self.fillDarkAct.triggered.connect(lambda : self.cwAct.setEnabled(False))
-    self.cellActs.addAction(self.fillDarkAct)
+    self.cellActs.append(self.fillDarkAct)
 
     self.transparentAct = QAction(QIcon(), '&Transparent')
     self.transparentAct.setShortcut('Ctrl+V')
@@ -117,13 +119,11 @@ class StackMaker(QMainWindow):
     fileMenu.addAction(self.copyAct)
 
     drawMenu = menubar.addMenu('&Draw')
-    drawMenu.addAction(self.eraseAct)
-    drawMenu.addAction(self.fillWhiteAct)
-    drawMenu.addAction(self.fillLightAct)
-    drawMenu.addAction(self.fillDarkAct)
+    for act in self.cellActs:
+      drawMenu.addAction(act)
     # drawMenu.addSeparator()
     pieceMenu = drawMenu.addMenu('&Piece')
-    for act in self.pieceActs.actions():
+    for act in self.pieceActs:
       pieceMenu.addAction(act)
     pieceMenu.addSeparator()
     pieceMenu.addAction(self.ccwAct)
@@ -140,12 +140,10 @@ class StackMaker(QMainWindow):
   def _createToolBar(self):
     self.toolbar = self.addToolBar('test')
     self.toolbar.setMovable(False)
-    self.toolbar.addAction(self.eraseAct)
-    self.toolbar.addAction(self.fillWhiteAct)
-    self.toolbar.addAction(self.fillLightAct)
-    self.toolbar.addAction(self.fillDarkAct)
+    for act in self.cellActs:
+      self.toolbar.addAction(act)
     self.toolbar.addSeparator()
-    for act in self.pieceActs.actions():
+    for act in self.pieceActs:
       self.toolbar.addAction(act)
 
   def initUI(self):

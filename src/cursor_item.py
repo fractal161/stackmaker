@@ -95,26 +95,11 @@ class CursorItem(QGraphicsItem):
     # self.prepareGeometryChange()
     self.setTransform(QTransform().translate(x, y))
 
-  # Make cursor item visible with respect to a certain rectangle
-  def setVisible(self, visible, *args):
-    super().setVisible(visible)
-
-  '''
-  This will probably be a massive headache, so let's not worry abt it now
-  def setVisible(self, visible, rect=QRectF()):
-    if not visible:
-      for item in self.items:
-        item.setVisible(False)
-      self.update()
-      return
-    for item in self.items:
-      # print(rect)
-      # print(item.boundingRect())
-      if rect.isNull() or rect.contains(item.sceneBoundingRect()):
-        item.setVisible(True)
-  '''
-
   def paint(self, painter, option, widget):
+    path = QPainterPath()
+    path.addRect(QRectF(12*8, 6*8, 10*8, 20*8))
+    path = self.mapFromScene(path)
+    painter.setClipPath(path)
     for tile in self.items:
       tile.paint(painter, option, widget)
     # self.bound.paint(painter, option, widget)
