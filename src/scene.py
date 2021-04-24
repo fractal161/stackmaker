@@ -1,11 +1,13 @@
 import os
 
+from PyQt5.QtCore import Qt, QRectF
 from PyQt5.QtWidgets import QGraphicsScene
 from PyQt5.QtGui import QPixmap, QTransform
 
 from .tile import Cell, Digit
 from .tile_group import Board, Number
 from .cursor_item import CursorItem
+from .piece import Piece
 from .connect import OcrHandler
 
 
@@ -49,6 +51,12 @@ class Scene(QGraphicsScene):
       statNum.translate(6 * 8, (12 + 2 * i) * 8)
       self.stats.append(statNum)
 
+    self.previewCoords = [(204,119), (204,119), (204,119), (208,119), (204,119), (204,119), (208,123)]
+    self.previewType = 0
+    self.preview = Piece(self.previewType, 0, self.meta, 255)
+    self.addItem(self.preview)
+    self.preview.updateOffset(*self.previewCoords[self.previewType])
+
     self.cursor = CursorItem(1, self.meta)
     self.addItem(self.cursor)
     self.cursor.setVisible(False)
@@ -67,6 +75,19 @@ class Scene(QGraphicsScene):
 
   def mousePressEvent(self, e):
     item = self.itemAtMouse(e.scenePos())
+    # Checks if mouse is inside next box
+    if QRectF(192, 112, 32, 24).contains(e.scenePos()):
+      if e.button() == Qt.LeftButton:
+        self.previewType += 1
+      else:
+        self.previewType -= 1
+      self.previewType %= 8
+      if self.previewType == 7:
+        self.preview.setVisible(False)
+      else:
+        self.preview.setVisible(True)
+        self.preview.setType(self.previewType)
+        self.preview.updateOffset(*self.previewCoords[self.previewType])
     if isinstance(item, Cell):
       # Drawing a single tile
       if isinstance(self.cursor.type, int):
@@ -86,6 +107,7 @@ class Scene(QGraphicsScene):
       self.meta['level'] = self.level.getValue()
       self.board.updatePalette()
       self.cursor.updatePalette()
+      self.preview.updatePalette()
 
   def mouseDoubleClickEvent(self, e):
     self.mousePressEvent(e)
@@ -102,12 +124,9 @@ class Scene(QGraphicsScene):
       self.cursor.updateOffset(mouseX, mouseY)
     else:
       self.cursor.setVisible(False)
-    # This usually works
+
     item = self.itemAtMouse(e.scenePos())
-    # if item is not None:
-    #   print(item.boundingBox())
     if self.drawMode:
-      # item = self.itemAtMouse(e.scenePos())
       if isinstance(item, Cell):
         item.setState(self.meta['cellState'])
     super().mouseMoveEvent(e)
