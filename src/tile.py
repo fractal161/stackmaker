@@ -10,7 +10,7 @@ class Cell(QGraphicsPixmapItem):
   tiles = []
   for i in range(4):
     main_path = os.path.dirname(__file__)
-    tiles.append(QImage(os.path.join(main_path, f'../assets/tile{i}.png')).convertToFormat(3, [0xFFFFFEFF, 0xFF000000, 0xFF4240FF, 0xFFB53120]))
+    tiles.append(QImage(os.path.join(main_path, f'../assets/tile{i}.png')).convertToFormat(QImage.Format_Indexed8, [0xFFFFFEFF, 0xFF000000, 0xFF4240FF, 0xFFB53120]))
 
   colors = [
     [0xFF4240FF, 0xFF64B0FF],
@@ -25,12 +25,9 @@ class Cell(QGraphicsPixmapItem):
     [0xFFB53120, 0xFFEA9E22]
   ]
 
-  def __init__(self, x, y, meta):
+  def __init__(self, meta):
     super().__init__()
     self.state = 0
-    self.oldstate = 0
-    self.x = x
-    self.y = y
     self.meta = meta
     self.setState(self.state)
     self.setAcceptHoverEvents(True)
@@ -43,9 +40,7 @@ class Cell(QGraphicsPixmapItem):
     newCell.setColorTable([color & ((opacity << 24) | 0x00FFFFFF) for color in newCell.colorTable()])
     self.setPixmap(QPixmap(newCell))
 
-  def setState(self, state, backup=True):
-    if backup:
-      self.oldstate = self.state
+  def setState(self, state):
     self.state = state
     newCell = Cell.tiles[state].copy()
     newCell.setColor(2, Cell.colors[self.meta['level'] % 10][0])
@@ -53,10 +48,7 @@ class Cell(QGraphicsPixmapItem):
     self.setPixmap(QPixmap(newCell))
 
   def updatePalette(self):
-    self.setState(self.state, False)
-
-  def restoreState(self):
-    self.setState(self.oldstate)
+    self.setState(self.state)
 
 class Digit(QGraphicsPixmapItem):
   numbers = []

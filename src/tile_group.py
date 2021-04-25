@@ -10,7 +10,7 @@ class Board():
     self.height = height
     self.meta = meta
 
-    self.cells = [[Cell(j, i, meta) for j in range(self.width)] for i in range(self.height)]
+    self.cells = [[Cell(meta) for j in range(self.width)] for i in range(self.height)]
     for i in range(self.height):
       for j in range(self.width):
         self.cells[i][j].setOffset(8 * j, 8 * i)

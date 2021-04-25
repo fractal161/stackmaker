@@ -1,12 +1,13 @@
 import os
 
 from PyQt5.QtCore import Qt, QRectF
-from PyQt5.QtWidgets import QGraphicsScene
+from PyQt5.QtWidgets import QGraphicsScene, QGraphicsPixmapItem
 from PyQt5.QtGui import QPixmap, QTransform
 
 from .tile import Cell, Digit
 from .tile_group import Board, Number
 from .cursor_item import CursorItem
+from .palette_item import PaletteItem
 from .piece import Piece
 from .connect import OcrHandler
 
@@ -50,6 +51,12 @@ class Scene(QGraphicsScene):
       statNum = Number(self, 3, 0xFFB53120)
       statNum.translate(6 * 8, (12 + 2 * i) * 8)
       self.stats.append(statNum)
+
+    main_path = os.path.dirname(__file__)
+    self.statsPieces = PaletteItem(QPixmap(os.path.join(main_path, f'../assets/pieceStats.png')))
+    self.statsPieces.setOffset(24, 88)
+    self.addItem(self.statsPieces)
+
 
     self.previewCoords = [(204,119), (204,119), (204,119), (208,119), (204,119), (204,119), (208,123)]
     self.previewType = 0
@@ -108,6 +115,7 @@ class Scene(QGraphicsScene):
       self.board.updatePalette()
       self.cursor.updatePalette()
       self.preview.updatePalette()
+      self.statsPieces.updatePalette(self.level.getValue() % 10)
 
   def mouseDoubleClickEvent(self, e):
     self.mousePressEvent(e)

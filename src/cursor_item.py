@@ -56,14 +56,14 @@ class CursorItem(QGraphicsItem):
     self.type = type
     self.items = []
     if isinstance(type, int):
-      item = Cell(0, 0, self.meta)
+      item = Cell(self.meta)
       item.setState(type)
       item.setOpacity(127)
       self.items.append(item)
     else:
       state = CursorItem.pieceStates[type[0]]
       for coord in CursorItem.coords[type[0]][type[1]]:
-        item = Cell(0, 0, self.meta)
+        item = Cell(self.meta)
         item.setState(state)
         item.setOffset(8 * coord[0], 8 * coord[1])
         item.setOpacity(127)

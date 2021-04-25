@@ -54,7 +54,7 @@ class Piece(QGraphicsItem):
     self.items = []
     state = Piece.tileStates[type]
     for coord in Piece.coords[type][orient]:
-      item = Cell(0, 0, self.meta)
+      item = Cell(self.meta)
       item.setState(state)
       item.setOffset(8 * coord[0], 8 * coord[1])
       item.setOpacity(self.opacity)
