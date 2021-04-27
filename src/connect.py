@@ -53,9 +53,26 @@ class OcrHandler(QTcpServer):
   # Process data
   def updateScene(self, game):
     if self.lastField != game['field']:
-      self.scene.level.setValue(int(game['level']))
-      self.scene.meta['level'] = int(game['level'])
-      self.scene.score.setValue(int(game['score']))
-      self.scene.lines.setValue(int(game['lines']))
+      value = game['level']
+      if value is None:
+        self.scene.level.setValue(0)
+      else:
+        self.scene.level.setValue(int(value))
+      value = game['score']
+      if value is None:
+        self.scene.score.setValue(0)
+      else:
+        self.scene.score.setValue(int(value))
+      value = game['lines']
+      if value is None:
+        self.scene.lines.setValue(0)
+      else:
+        self.scene.lines.setValue(int(value))
+      value = game['preview']
+      if value is None:
+        self.scene.setPreview(7)
+      else:
+        self.scene.setPreview('TJZOSLI'.index(value))
       self.scene.board.setCells(game['field'])
+      self.scene.updatePalette()
     self.lastField = game['field']

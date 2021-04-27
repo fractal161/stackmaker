@@ -41,10 +41,10 @@ class Piece(QGraphicsItem):
       [[0, -2], [0, -1], [0, 0], [0, 1]]
     ]
   ]
-  def __init__(self, type, orient, meta, opacity=127, *args, **kwargs):
+  def __init__(self, type, orient, opacity=127, level=8, *args, **kwargs):
     super().__init__(*args, **kwargs)
-    self.meta = meta
     self.opacity = opacity
+    self.level = level
     self.setType(type, orient)
 
   def setType(self, type, orient=0):
@@ -54,7 +54,7 @@ class Piece(QGraphicsItem):
     self.items = []
     state = Piece.tileStates[type]
     for coord in Piece.coords[type][orient]:
-      item = Cell(self.meta)
+      item = Cell(self.level)
       item.setState(state)
       item.setOffset(8 * coord[0], 8 * coord[1])
       item.setOpacity(self.opacity)
@@ -66,10 +66,10 @@ class Piece(QGraphicsItem):
   def ccw(self):
     self.setType([self.type[0], (self.type[1]-1)%len(CursorItem.coords[self.type[0]])])
 
-
-  def updatePalette(self):
+  def updatePalette(self, level):
+    self.level = level
     for item in self.items:
-      item.updatePalette()
+      item.updatePalette(level)
       item.setOpacity(self.opacity)
     self.update()
 

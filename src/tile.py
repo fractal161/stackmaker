@@ -25,29 +25,30 @@ class Cell(QGraphicsPixmapItem):
     [0xFFB53120, 0xFFEA9E22]
   ]
 
-  def __init__(self, meta):
+  def __init__(self, level=8):
     super().__init__()
     self.state = 0
-    self.meta = meta
+    self.level = level
     self.setState(self.state)
     self.setAcceptHoverEvents(True)
     # self.setFlags(QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsFocusable)
 
   def setOpacity(self, opacity):
     newCell = Cell.tiles[self.state].copy()
-    newCell.setColor(2, Cell.colors[self.meta['level'] % 10][0])
-    newCell.setColor(3, Cell.colors[self.meta['level'] % 10][1])
+    newCell.setColor(2, Cell.colors[self.level][0])
+    newCell.setColor(3, Cell.colors[self.level][1])
     newCell.setColorTable([color & ((opacity << 24) | 0x00FFFFFF) for color in newCell.colorTable()])
     self.setPixmap(QPixmap(newCell))
 
   def setState(self, state):
     self.state = state
     newCell = Cell.tiles[state].copy()
-    newCell.setColor(2, Cell.colors[self.meta['level'] % 10][0])
-    newCell.setColor(3, Cell.colors[self.meta['level'] % 10][1])
+    newCell.setColor(2, Cell.colors[self.level][0])
+    newCell.setColor(3, Cell.colors[self.level][1])
     self.setPixmap(QPixmap(newCell))
 
-  def updatePalette(self):
+  def updatePalette(self, level):
+    self.level = level
     self.setState(self.state)
 
 class Digit(QGraphicsPixmapItem):

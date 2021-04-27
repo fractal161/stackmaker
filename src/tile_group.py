@@ -5,12 +5,11 @@ from PyQt5.QtGui import QPixmap, QImage, QTransform
 from .tile import Cell, Digit
 
 class Board():
-  def __init__(self, scene, width, height, meta):
+  def __init__(self, scene, width, height):
     self.width = width
     self.height = height
-    self.meta = meta
 
-    self.cells = [[Cell(meta) for j in range(self.width)] for i in range(self.height)]
+    self.cells = [[Cell() for j in range(self.width)] for i in range(self.height)]
     for i in range(self.height):
       for j in range(self.width):
         self.cells[i][j].setOffset(8 * j, 8 * i)
@@ -21,10 +20,10 @@ class Board():
       for j in range(self.width):
         self.cells[i][j].setTransform(QTransform().translate(x, y))
 
-  def updatePalette(self):
+  def updatePalette(self, level):
     for i in range(self.height):
       for j in range(self.width):
-        self.cells[i][j].updatePalette()
+        self.cells[i][j].updatePalette(level)
 
   # Accepts a string
   def setCells(self, newCells):

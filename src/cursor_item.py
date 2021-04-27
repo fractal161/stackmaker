@@ -5,48 +5,11 @@ from .tile import Cell
 from .piece import Piece
 
 class CursorItem(QGraphicsItem):
-  pieceStates = [1, 2, 3, 1, 2, 3, 1]
-  coords = [
-    [
-      [[0, 1], [0, 0], [1, 0], [-1, 0]],
-      [[0, 1], [0, 0], [1, 0], [0, -1]],
-      [[-1, 0], [0, 0], [1, 0], [0, -1]],
-      [[0, 1], [0, 0], [0, -1], [-1, 0]]
-    ],
-    [
-      [[-1, 0], [0, 0], [1, 0], [1, 1]],
-      [[0, -1], [1, -1], [0, 0], [0, 1]],
-      [[-1, -1], [-1, 0], [0, 0], [1, 0]],
-      [[0, -1], [0, 0], [-1, 1], [0, 1]]
-    ],
-    [
-      [[-1, 0], [0, 0], [0, 1], [1, 1]],
-      [[1, -1], [0, 0], [1, 0], [0, 1]]
-    ],
-    [
-      [[-1, 0], [0, 0], [-1, 1], [0, 1]]
-    ],
-    [
-      [[0, 0], [1, 0], [-1, 1], [0, 1]],
-      [[0, -1], [0, 0], [1, 0], [1, 1]]
-    ],
-    [
-    [
-      [-1, 0], [0, 0], [1, 0], [-1, 1]],
-      [[0, -1], [0, 0], [0, 1], [1, 1]],
-      [[1, -1], [-1, 0], [0, 0], [1, 0]],
-      [[-1, -1], [0, -1], [0, 0], [0, 1]]
-    ],
-    [
-      [[-2, 0], [-1, 0], [0, 0], [1, 0]],
-      [[0, -2], [0, -1], [0, 0], [0, 1]]
-    ]
-  ]
 
-  def __init__(self, type, meta, *args, **kwargs):
+  def __init__(self, type, level=8, *args, **kwargs):
     super().__init__(*args, **kwargs)
     self.type = type
-    self.meta = meta
+    self.level = level
     self.setType(self.type)
     self.boundingRect()
 
@@ -56,14 +19,14 @@ class CursorItem(QGraphicsItem):
     self.type = type
     self.items = []
     if isinstance(type, int):
-      item = Cell(self.meta)
+      item = Cell(self.level)
       item.setState(type)
       item.setOpacity(127)
       self.items.append(item)
     else:
-      state = CursorItem.pieceStates[type[0]]
-      for coord in CursorItem.coords[type[0]][type[1]]:
-        item = Cell(self.meta)
+      state = Piece.tileStates[type[0]]
+      for coord in Piece.coords[type[0]][type[1]]:
+        item = Cell(self.level)
         item.setState(state)
         item.setOffset(8 * coord[0], 8 * coord[1])
         item.setOpacity(127)
@@ -73,22 +36,23 @@ class CursorItem(QGraphicsItem):
   def getCoords(self):
     if isinstance(self.type, int):
       return None
-    return CursorItem.coords[self.type[0]][self.type[1]]
+    return Piece.coords[self.type[0]][self.type[1]]
 
   def getState(self):
     if isinstance(self.type, int):
       return self.type
-    return CursorItem.pieceStates[self.type[0]]
+    return Piece.tileStates[self.type[0]]
 
   def cw(self):
-    self.setType([self.type[0], (self.type[1]+1)%len(CursorItem.coords[self.type[0]])])
+    self.setType([self.type[0], (self.type[1]+1)%len(Piece.coords[self.type[0]])])
 
   def ccw(self):
-    self.setType([self.type[0], (self.type[1]-1)%len(CursorItem.coords[self.type[0]])])
+    self.setType([self.type[0], (self.type[1]-1)%len(Piece.coords[self.type[0]])])
 
-  def updatePalette(self):
+  def updatePalette(self, level):
+    self.level = level
     for item in self.items:
-      item.updatePalette()
+      item.updatePalette(level)
       item.setOpacity(127)
 
   def updateOffset(self, x, y):

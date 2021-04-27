@@ -19,7 +19,7 @@ class PaletteItem(QGraphicsPixmapItem):
     [0xFFB53120, 0xFFEA9E22]
   ]
 
-  def __init__(self, imageFile, palette=8):
+  def __init__(self, imageFile=None, palette=8):
     super().__init__()
     self.palette = palette
     self.image = QImage(imageFile).convertToFormat(QImage.Format_Indexed8, [0xFFFFFEFF, 0xFF000000, 0xFF4240FF, 0xFFB53120])
@@ -30,13 +30,6 @@ class PaletteItem(QGraphicsPixmapItem):
   def setOpacity(self, opacity):
     self.image.setColorTable([color & ((opacity << 24) | 0x00FFFFFF) for color in self.image.colorTable()])
     self.setPixmap(QPixmap(self.image))
-
-  # def setState(self, state):
-  #   self.state = state
-  #   newCell = Cell.tiles[state].copy()
-  #   newCell.setColor(2, Cell.colors[self.meta['level'] % 10][0])
-  #   newCell.setColor(3, Cell.colors[self.meta['level'] % 10][1])
-  #   self.setPixmap(QPixmap(newCell))
 
   def updatePalette(self, palette):
     self.palette = palette

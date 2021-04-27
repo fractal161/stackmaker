@@ -14,13 +14,9 @@ from .connect import OcrHandler
 
 class Scene(QGraphicsScene):
   def __init__(self, width, height, *args, **kwargs):
+    super().__init__(*args, **kwargs)
     self.width = width
     self.height = height
-    self.meta = {
-      'level' : 18,
-      'cellState' : 1
-    }
-    super().__init__(*args, **kwargs)
     self.initScene()
     # Gonna be weird for a bit
     self.ocrHandler = OcrHandler(self)
@@ -31,7 +27,7 @@ class Scene(QGraphicsScene):
     bgImage = QPixmap(os.path.join(os.path.dirname(__file__), '../assets/boardLayout.png'))
     self.image = self.addPixmap(bgImage)
 
-    self.board = Board(self, 10, 20, self.meta)
+    self.board = Board(self, 10, 20)
     self.board.translate(12 * 8, 6 * 8)
 
     self.top = Number(self, 6)
@@ -43,7 +39,7 @@ class Scene(QGraphicsScene):
     self.lines = Number(self, 3)
     self.lines.translate(19 * 8, 3 * 8)
 
-    self.level = Number(self, 2, value=self.meta['level'])
+    self.level = Number(self, 2, value=18)
     self.level.translate(26 * 8, 21 * 8)
 
     self.stats = []
@@ -60,18 +56,36 @@ class Scene(QGraphicsScene):
 
     self.previewCoords = [(204,119), (204,119), (204,119), (208,119), (204,119), (204,119), (208,123)]
     self.previewType = 0
-    self.preview = Piece(self.previewType, 0, self.meta, 255)
+    self.preview = Piece(self.previewType, 0, 255)
     self.addItem(self.preview)
     self.preview.updateOffset(*self.previewCoords[self.previewType])
 
-    self.cursor = CursorItem(1, self.meta)
+    self.cursor = CursorItem(1)
     self.addItem(self.cursor)
     self.cursor.setVisible(False)
+
+    self.cellState = 1
     self.drawMode = False
 
   def setCellState(self, state):
-    self.meta['cellState'] = state
+    self.cellState = state
     self.cursor.setType(state)
+
+  def updatePalette(self):
+    level = self.level.getValue() % 10
+    self.board.updatePalette(level)
+    self.cursor.updatePalette(level)
+    self.preview.updatePalette(level)
+    self.statsPieces.updatePalette(level)
+
+  def setPreview(self, type):
+    self.previewType = type
+    if type == 7:
+      self.preview.setVisible(False)
+    else:
+      self.preview.setVisible(True)
+      self.preview.setType(type)
+      self.preview.updateOffset(*self.previewCoords[type])
 
   def itemAtMouse(self, pos):
     itemList = self.items(pos)
@@ -99,7 +113,7 @@ class Scene(QGraphicsScene):
       # Drawing a single tile
       if isinstance(self.cursor.type, int):
         self.drawMode = True
-        item.setState(self.meta['cellState'])
+        item.setState(self.cellState)
       #Drawing a piece, so need to drag stuff
       else:
         mouseX, mouseY = int((e.scenePos().x() // 8)-12), int((e.scenePos().y() // 8)-6)
@@ -111,11 +125,7 @@ class Scene(QGraphicsScene):
 
     super().mousePressEvent(e)
     if item in self.level.digits:
-      self.meta['level'] = self.level.getValue()
-      self.board.updatePalette()
-      self.cursor.updatePalette()
-      self.preview.updatePalette()
-      self.statsPieces.updatePalette(self.level.getValue() % 10)
+      self.updatePalette()
 
   def mouseDoubleClickEvent(self, e):
     self.mousePressEvent(e)
@@ -136,5 +146,5 @@ class Scene(QGraphicsScene):
     item = self.itemAtMouse(e.scenePos())
     if self.drawMode:
       if isinstance(item, Cell):
-        item.setState(self.meta['cellState'])
+        item.setState(self.cellState)
     super().mouseMoveEvent(e)
