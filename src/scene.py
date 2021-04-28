@@ -65,6 +65,7 @@ class Scene(QGraphicsScene):
     self.cursor.setVisible(False)
 
     self.cellState = 1
+    self.transparentDraw = False
     self.drawMode = False
     self.lastMousePos = None
 
@@ -81,6 +82,14 @@ class Scene(QGraphicsScene):
     height = int(max(0, 26 - mouseY))
     self.cursor.setType([-1, height])
 
+  def drawCell(self, cell, state=None):
+    if state is None:
+      cell.setState(self.cursor.getState())
+    else:
+      cell.setState(state)
+    if self.transparentDraw:
+      cell.setOpacity(127)
+
   def drawCol(self):
     boardX, boardY = int((self.lastMousePos.x() // 8)-12), int((self.lastMousePos.y() // 8)-6)
     if boardX < 0 or boardX > 9:
@@ -89,11 +98,14 @@ class Scene(QGraphicsScene):
     self.maxColHeight = min(self.maxColHeight, boardY)
     i = self.maxColHeight
     while i < boardY and i < 20:
-      self.board.cells[i][boardX].setState(0)
+      self.drawCell(self.board.cells[i][boardX], 0)
       i += 1
     while i < 20:
-      self.board.cells[i][boardX].setState(1)
+      self.drawCell(self.board.cells[i][boardX], 1)
       i += 1
+
+  def setTransparentDraw(self, state):
+    self.transparentDraw = state
 
   def updatePalette(self):
     level = self.level.getValue() % 10
@@ -138,7 +150,7 @@ class Scene(QGraphicsScene):
       # Drawing a single tile
       if isinstance(self.cursor.type, int):
         self.drawMode = True
-        item.setState(self.cellState)
+        self.drawCell(item)
       # Drawing a column
       elif self.cursor.type[0] == -1:
         self.drawMode = True
@@ -151,7 +163,7 @@ class Scene(QGraphicsScene):
           tmpX = mouseX + coord[0]
           tmpY = mouseY + coord[1]
           if tmpY in range(20) and tmpX in range(10):
-            self.board.cells[tmpY][tmpX].setState(self.cursor.getState())
+            self.drawCell(self.board.cells[tmpY][tmpX])
 
     super().mousePressEvent(e)
     if item in self.level.digits:
@@ -181,6 +193,6 @@ class Scene(QGraphicsScene):
       if isinstance(self.cursor.type, list):
         self.drawCol()
       elif isinstance(item, Cell):
-        item.setState(self.cellState)
+        self.drawCell(item)
     self.lastMousePos = e.scenePos()
     super().mouseMoveEvent(e)

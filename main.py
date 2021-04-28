@@ -106,6 +106,7 @@ class StackMaker(QMainWindow):
     self.transparentAct.setShortcut('Ctrl+V')
     self.transparentAct.setStatusTip('Draw with transparent cells')
     self.transparentAct.setCheckable(True)
+    self.transparentAct.triggered.connect(lambda x : self.scene.setTransparentDraw(x))
 
     self.rgbAct = QAction(QIcon(), '&Option Colors')
     self.rgbAct.setShortcut('Ctrl+A')
