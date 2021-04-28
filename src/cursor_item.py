@@ -23,7 +23,7 @@ class CursorItem(QGraphicsItem):
       item.setState(type)
       item.setOpacity(127)
       self.items.append(item)
-    else:
+    elif type[0] != -1:
       state = Piece.tileStates[type[0]]
       for coord in Piece.coords[type[0]][type[1]]:
         item = Cell(self.level)
@@ -31,10 +31,18 @@ class CursorItem(QGraphicsItem):
         item.setOffset(8 * coord[0], 8 * coord[1])
         item.setOpacity(127)
         self.items.append(item)
+    else:
+      height = type[1]
+      for i in range(height):
+        item = Cell(self.level)
+        item.setState(1)
+        item.setOffset(0, 8 * i)
+        item.setOpacity(127)
+        self.items.append(item)
     self.update()
 
   def getCoords(self):
-    if isinstance(self.type, int):
+    if isinstance(self.type, int) or self.type[0] == -1:
       return None
     return Piece.coords[self.type[0]][self.type[1]]
 

@@ -29,13 +29,13 @@ class StackMaker(QMainWindow):
     self.copyAct.triggered.connect(self.copy)
 
     self.ccwAct = QAction(QIcon(), '&Counterclockwise')
-    self.ccwAct.setShortcut('C')
+    self.ccwAct.setShortcut('Q')
     self.ccwAct.setStatusTip('Rotate counterclockwise')
     self.ccwAct.setEnabled(False)
     self.ccwAct.triggered.connect(self.scene.cursor.ccw)
 
     self.cwAct = QAction(QIcon(), '&Clockwise')
-    self.cwAct.setShortcut('V')
+    self.cwAct.setShortcut('W')
     self.cwAct.setStatusTip('Rotate clockwise')
     self.cwAct.setEnabled(False)
     self.cwAct.triggered.connect(self.scene.cursor.cw)
@@ -94,6 +94,14 @@ class StackMaker(QMainWindow):
     self.fillDarkAct.triggered.connect(lambda : self.cwAct.setEnabled(False))
     self.cellActs.append(self.fillDarkAct)
 
+    self.fillColAct = QAction(QIcon(QPixmap(os.path.join(main_path, './assets/tileStack.png'))), '&Fill Column', self.mainActs)
+    self.fillColAct.setShortcut('C')
+    self.fillColAct.setStatusTip('Fill basic stack.')
+    self.fillColAct.setCheckable(True)
+    self.fillColAct.triggered.connect(lambda : self.scene.setColCursor())
+    self.fillColAct.triggered.connect(lambda : self.ccwAct.setEnabled(False))
+    self.fillColAct.triggered.connect(lambda : self.cwAct.setEnabled(False))
+
     self.transparentAct = QAction(QIcon(), '&Transparent')
     self.transparentAct.setShortcut('Ctrl+V')
     self.transparentAct.setStatusTip('Draw with transparent cells')
@@ -121,6 +129,7 @@ class StackMaker(QMainWindow):
     drawMenu = menubar.addMenu('&Draw')
     for act in self.cellActs:
       drawMenu.addAction(act)
+    drawMenu.addAction(self.fillColAct)
     # drawMenu.addSeparator()
     pieceMenu = drawMenu.addMenu('&Piece')
     for act in self.pieceActs:
@@ -142,6 +151,7 @@ class StackMaker(QMainWindow):
     self.toolbar.setMovable(False)
     for act in self.cellActs:
       self.toolbar.addAction(act)
+    self.toolbar.addAction(self.fillColAct)
     self.toolbar.addSeparator()
     for act in self.pieceActs:
       self.toolbar.addAction(act)
@@ -206,6 +216,7 @@ class StackMaker(QMainWindow):
 
 def main():
   app = QApplication(sys.argv)
+  app.setWindowIcon(QIcon('./assets/tile3.png'))
   ex = StackMaker()
   sys.exit(app.exec_())
 

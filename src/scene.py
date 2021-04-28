@@ -66,10 +66,34 @@ class Scene(QGraphicsScene):
 
     self.cellState = 1
     self.drawMode = False
+    self.lastMousePos = None
 
   def setCellState(self, state):
     self.cellState = state
     self.cursor.setType(state)
+
+  def setColCursor(self):
+    # Figure out height using current mouse position
+    if self.lastMousePos is None:
+      self.cursor.setType([-1, 0])
+      return
+    mouseY = self.lastMousePos.y() // 8
+    height = int(max(0, 26 - mouseY))
+    self.cursor.setType([-1, height])
+
+  def drawCol(self):
+    boardX, boardY = int((self.lastMousePos.x() // 8)-12), int((self.lastMousePos.y() // 8)-6)
+    if boardX < 0 or boardX > 9:
+      return
+    boardY = max(0, boardY)
+    self.maxColHeight = min(self.maxColHeight, boardY)
+    i = self.maxColHeight
+    while i < boardY and i < 20:
+      self.board.cells[i][boardX].setState(0)
+      i += 1
+    while i < 20:
+      self.board.cells[i][boardX].setState(1)
+      i += 1
 
   def updatePalette(self):
     level = self.level.getValue() % 10
@@ -109,11 +133,17 @@ class Scene(QGraphicsScene):
         self.preview.setVisible(True)
         self.preview.setType(self.previewType)
         self.preview.updateOffset(*self.previewCoords[self.previewType])
+
     if isinstance(item, Cell):
       # Drawing a single tile
       if isinstance(self.cursor.type, int):
         self.drawMode = True
         item.setState(self.cellState)
+      # Drawing a column
+      elif self.cursor.type[0] == -1:
+        self.drawMode = True
+        self.maxColHeight = 19
+        self.drawCol()
       #Drawing a piece, so need to drag stuff
       else:
         mouseX, mouseY = int((e.scenePos().x() // 8)-12), int((e.scenePos().y() // 8)-6)
@@ -140,11 +170,17 @@ class Scene(QGraphicsScene):
     if mouseX in range(12*8,12*8+10*8,8) and mouseY in range(6*8,6*8+20*8,8):
       self.cursor.setVisible(True)
       self.cursor.updateOffset(mouseX, mouseY)
+      # Update column height if necessary
+      if isinstance(self.cursor.type, list) and self.cursor.type[0] == -1:
+        self.setColCursor()
     else:
       self.cursor.setVisible(False)
 
     item = self.itemAtMouse(e.scenePos())
     if self.drawMode:
-      if isinstance(item, Cell):
+      if isinstance(self.cursor.type, list):
+        self.drawCol()
+      elif isinstance(item, Cell):
         item.setState(self.cellState)
+    self.lastMousePos = e.scenePos()
     super().mouseMoveEvent(e)
