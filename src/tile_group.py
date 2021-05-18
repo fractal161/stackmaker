@@ -12,13 +12,14 @@ class Board():
     self.cells = [[Cell() for j in range(self.width)] for i in range(self.height)]
     for i in range(self.height):
       for j in range(self.width):
-        self.cells[i][j].setOffset(8 * j, 8 * i)
+        self.cells[i][j].setTransform(QTransform.fromTranslate(8 * j, 8 * i))
         scene.addItem(self.cells[i][j])
 
   def translate(self, x, y):
     for i in range(self.height):
       for j in range(self.width):
-        self.cells[i][j].setTransform(QTransform().translate(x, y))
+        transform = self.cells[i][j].transform()
+        self.cells[i][j].setTransform(transform.translate(x, y))
 
   def updatePalette(self, level):
     for i in range(self.height):
@@ -40,7 +41,7 @@ class Number():
     self.digits = []
     for i in range(length):
       digit = Digit(value % 10, self.color)
-      digit.setOffset((length - i - 1) * 8, 0)
+      digit.setTransform(QTransform.fromTranslate((length - i - 1) * 8, 0))
       scene.addItem(digit)
       self.digits.insert(0, digit)
 
@@ -48,7 +49,8 @@ class Number():
 
   def translate(self, x, y):
     for i in range(self.length):
-      self.digits[i].setTransform(QTransform().translate(x, y))
+      transform = self.digits[i].transform()
+      self.digits[i].setTransform(transform.translate(x, y))
 
   def getValue(self):
     value = 0

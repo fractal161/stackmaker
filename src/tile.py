@@ -28,12 +28,15 @@ class Cell(QGraphicsPixmapItem):
   def __init__(self, level=8):
     super().__init__()
     self.state = 0
+    self.opacity = 255
     self.level = level
     self.setState(self.state)
+    self.setOpacity(self.opacity)
     self.setAcceptHoverEvents(True)
     # self.setFlags(QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsFocusable)
 
   def setOpacity(self, opacity):
+    self.opacity = opacity
     newCell = Cell.tiles[self.state].copy()
     newCell.setColor(2, Cell.colors[self.level][0])
     newCell.setColor(3, Cell.colors[self.level][1])

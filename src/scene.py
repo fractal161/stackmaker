@@ -10,6 +10,7 @@ from .cursor_item import CursorItem
 from .palette_item import PaletteItem
 from .piece import Piece
 from .connect import OcrHandler
+from .undo import *
 
 
 class Scene(QGraphicsScene):
@@ -50,7 +51,7 @@ class Scene(QGraphicsScene):
 
     main_path = os.path.dirname(__file__)
     self.statsPieces = PaletteItem(QPixmap(os.path.join(main_path, f'../assets/pieceStats.png')))
-    self.statsPieces.setOffset(24, 88)
+    self.statsPieces.setTransform(QTransform.fromTranslate(24, 88))
     self.addItem(self.statsPieces)
 
 
@@ -69,6 +70,9 @@ class Scene(QGraphicsScene):
     self.drawMode = False
     self.lastMousePos = None
 
+    self.actionBuffer = ActionBuffer()
+    self.actionGroup = []
+
   def setCellState(self, state):
     self.cellState = state
     self.cursor.setType(state)
@@ -82,13 +86,21 @@ class Scene(QGraphicsScene):
     height = int(max(0, 26 - mouseY))
     self.cursor.setType([-1, height])
 
-  def drawCell(self, cell, state=None):
+  def drawCell(self, cell, state=None,buffer=True):
+    x,y=int((cell.scenePos().x() - 96) // 8), int((cell.scenePos().y() - 48) // 8)
+    oldData = CellData(x, y, cell.state, cell.opacity == 127)
+
     if state is None:
       cell.setState(self.cursor.getState())
     else:
       cell.setState(state)
     if self.transparentDraw:
       cell.setOpacity(127)
+    if buffer and (oldData.state != cell.state or (oldData.transparency != (cell.opacity == 127))):
+      newData = CellData(x, y, cell.state, cell.opacity == 127)
+      self.actionBuffer.removeForward()
+      self.actionGroup.append(CellAction(oldData, newData))
+
 
   def drawCol(self):
     boardX, boardY = int((self.lastMousePos.x() // 8)-12), int((self.lastMousePos.y() // 8)-6)
@@ -103,6 +115,7 @@ class Scene(QGraphicsScene):
     while i < 20:
       self.drawCell(self.board.cells[i][boardX], 1)
       i += 1
+    self.appendToBuffer()
 
   def setTransparentDraw(self, state):
     self.transparentDraw = state
@@ -122,6 +135,31 @@ class Scene(QGraphicsScene):
       self.preview.setVisible(True)
       self.preview.setType(type)
       self.preview.updateOffset(*self.previewCoords[type])
+
+  def appendToBuffer(self):
+    if len(self.actionGroup) > 0:
+      self.actionBuffer.append(self.actionGroup[:])
+      self.actionGroup = []
+
+  def undo(self):
+    actions = self.actionBuffer.undo()
+    if isinstance(actions, list) and isinstance(actions[0], CellAction):
+      tmp = self.transparentDraw
+      for act in actions:
+        x,y = act.old.x, act.old.y
+        self.transparentDraw = act.old.transparency
+        self.drawCell(self.board.cells[y][x], act.old.state,False)
+      self.transparentDraw = tmp
+
+  def redo(self):
+    actions = self.actionBuffer.redo()
+    if isinstance(actions, list) and isinstance(actions[0], CellAction):
+      tmp = self.transparentDraw
+      for act in actions:
+        x,y = act.new.x, act.new.y
+        self.transparentDraw = act.new.transparency
+        self.drawCell(self.board.cells[y][x], act.new.state,False)
+      self.transparentDraw = tmp
 
   def itemAtMouse(self, pos):
     itemList = self.items(pos)
@@ -151,6 +189,7 @@ class Scene(QGraphicsScene):
       if isinstance(self.cursor.type, int):
         self.drawMode = True
         self.drawCell(item)
+        self.appendToBuffer()
       # Drawing a column
       elif self.cursor.type[0] == -1:
         self.drawMode = True
@@ -164,6 +203,7 @@ class Scene(QGraphicsScene):
           tmpY = mouseY + coord[1]
           if tmpY in range(20) and tmpX in range(10):
             self.drawCell(self.board.cells[tmpY][tmpX])
+        self.appendToBuffer()
 
     super().mousePressEvent(e)
     if item in self.level.digits:
@@ -194,5 +234,6 @@ class Scene(QGraphicsScene):
         self.drawCol()
       elif isinstance(item, Cell):
         self.drawCell(item)
+        self.appendToBuffer()
     self.lastMousePos = e.scenePos()
     super().mouseMoveEvent(e)

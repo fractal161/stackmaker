@@ -28,6 +28,19 @@ class StackMaker(QMainWindow):
     self.copyAct.setStatusTip('Copy entire board')
     self.copyAct.triggered.connect(self.copy)
 
+    self.undoAct = QAction(QIcon(os.path.join(main_path, './assets/icons/undo.png')), '&Undo', self)
+    self.undoAct.setShortcut('Ctrl+Z')
+    self.undoAct.setStatusTip('Undo most recent action')
+    self.undoAct.setEnabled(True)
+    self.undoAct.triggered.connect(self.scene.undo)
+
+    self.redoAct = QAction(QIcon(os.path.join(main_path, './assets/icons/redo.png')), '&Redo', self)
+    self.redoAct.setShortcut('Ctrl+Y')
+    self.redoAct.setStatusTip('Redo most recent action')
+    self.redoAct.setEnabled(True)
+    self.redoAct.triggered.connect(self.scene.redo)
+
+
     self.ccwAct = QAction(QIcon(), '&Counterclockwise')
     self.ccwAct.setShortcut('Q')
     self.ccwAct.setStatusTip('Rotate counterclockwise')
@@ -128,6 +141,8 @@ class StackMaker(QMainWindow):
     fileMenu.addAction(self.copyAct)
 
     drawMenu = menubar.addMenu('&Draw')
+    drawMenu.addAction(self.undoAct)
+    drawMenu.addAction(self.redoAct)
     for act in self.cellActs:
       drawMenu.addAction(act)
     drawMenu.addAction(self.fillColAct)
@@ -150,6 +165,9 @@ class StackMaker(QMainWindow):
   def _createToolBar(self):
     self.toolbar = self.addToolBar('test')
     self.toolbar.setMovable(False)
+    self.toolbar.addAction(self.undoAct)
+    self.toolbar.addAction(self.redoAct)
+    self.toolbar.addSeparator()
     for act in self.cellActs:
       self.toolbar.addAction(act)
     self.toolbar.addAction(self.fillColAct)
