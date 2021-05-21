@@ -9,6 +9,54 @@ from PyQt5.QtNetwork import *
 
 from src.scene import Scene
 
+class View(QGraphicsView):
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    self.rubberBand = QRubberBand(QRubberBand.Rectangle, self)
+    self.baseRect = QRect()
+
+  # Returns a QRect that covers the scene tile the coords are over
+  def _getBox(self, pos):
+    scenePos = self.mapToScene(pos)
+    newX = scenePos.x() // 8
+    newY = scenePos.y() // 8
+    topLeft = QPointF(8*newX, 8*newY)
+    bottomRight = topLeft+QPointF(8.0,8.0)
+    return QRect(self.mapFromScene(topLeft), self.mapFromScene(bottomRight))
+
+  def clearSelection(self):
+    self.rubberBand.setGeometry(QRect())
+
+  def selection(self):
+    return self.rubberBand.geometry()
+
+  def sceneSelection(self):
+    topLeft = self.rubberBand.geometry().topLeft()
+    topLeft = self.mapToScene(topLeft)
+    bottomRight = self.rubberBand.geometry().bottomRight()
+    bottomRight = self.mapToScene(bottomRight)
+    return QRectF(topLeft, bottomRight)
+
+  def mousePressEvent(self, e):
+    super().mousePressEvent(e)
+    if e.button() == Qt.LeftButton:
+      self.baseRect = self._getBox(e.pos())
+      self.rubberBand.setGeometry(self.baseRect)
+      self.rubberBand.show()
+
+  def mouseMoveEvent(self, e):
+    super().mouseMoveEvent(e)
+    if int(e.buttons()) & Qt.LeftButton:
+      newRect = self._getBox(e.pos())
+      self.rubberBand.setGeometry(self.baseRect.united(newRect));
+
+  def mouseReleaseEvent(self, e):
+    super().mouseReleaseEvent(e)
+
+  def mouseDoubleClickEvent(self, e):
+    super().mouseDoubleClickEvent(e)
+    self.clearSelection()
+
 class StackMaker(QMainWindow):
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
@@ -28,13 +76,13 @@ class StackMaker(QMainWindow):
     self.copyAct.setStatusTip('Copy entire board')
     self.copyAct.triggered.connect(self.copy)
 
-    self.undoAct = QAction(QIcon(os.path.join(main_path, './assets/icons/undo.png')), '&Undo', self)
+    self.undoAct = QAction(QIcon(os.path.join(main_path, './assets/icons/undo.ico')), '&Undo', self)
     self.undoAct.setShortcut('Ctrl+Z')
     self.undoAct.setStatusTip('Undo most recent action')
     self.undoAct.setEnabled(True)
     self.undoAct.triggered.connect(self.scene.undo)
 
-    self.redoAct = QAction(QIcon(os.path.join(main_path, './assets/icons/redo.png')), '&Redo', self)
+    self.redoAct = QAction(QIcon(os.path.join(main_path, './assets/icons/redo.ico')), '&Redo', self)
     self.redoAct.setShortcut('Ctrl+Y')
     self.redoAct.setStatusTip('Redo most recent action')
     self.redoAct.setEnabled(True)
@@ -58,7 +106,7 @@ class StackMaker(QMainWindow):
     pieceNames = ['T','J','Z','O','S','L','I']
     self.pieceActs = []
     for i in range(7):
-      pieceAct = QAction(QIcon(QPixmap(os.path.join(main_path, f'./assets/{pieceNames[i]}.png'))), pieceNames[i], self.mainActs)
+      pieceAct = QAction(QIcon(os.path.join(main_path, f'./assets/icons/icon{pieceNames[i]}.ico')), pieceNames[i], self.mainActs)
       pieceAct.setShortcut(pieceNames[i])
       pieceAct.setStatusTip(f'Draw the {pieceNames[i]} piece')
       pieceAct.setCheckable(True)
@@ -79,7 +127,7 @@ class StackMaker(QMainWindow):
     self.eraseAct.triggered.connect(lambda : self.cwAct.setEnabled(False))
     self.cellActs.append(self.eraseAct)
 
-    self.fillWhiteAct = QAction(QIcon(QPixmap(os.path.join(main_path, './assets/tile1.png')).scaled(16, 16)), '&White Cell', self.mainActs)
+    self.fillWhiteAct = QAction(QIcon(os.path.join(main_path, './assets/icons/whiteCell.ico')), '&White Cell', self.mainActs)
     self.fillWhiteAct.setShortcut('1')
     self.fillWhiteAct.setStatusTip('Paint the white cell')
     self.fillWhiteAct.setCheckable(True)
@@ -89,25 +137,25 @@ class StackMaker(QMainWindow):
     self.fillWhiteAct.triggered.connect(lambda : self.cwAct.setEnabled(False))
     self.cellActs.append(self.fillWhiteAct)
 
-    self.fillLightAct = QAction(QIcon(QPixmap(os.path.join(main_path, './assets/tile2.png')).scaled(16, 16)), '&Light Cell', self.mainActs)
-    self.fillLightAct.setShortcut('2')
-    self.fillLightAct.setStatusTip('Paint the light cell')
-    self.fillLightAct.setCheckable(True)
-    self.fillLightAct.triggered.connect(lambda : self.scene.setCellState(2))
-    self.fillLightAct.triggered.connect(lambda : self.ccwAct.setEnabled(False))
-    self.fillLightAct.triggered.connect(lambda : self.cwAct.setEnabled(False))
-    self.cellActs.append(self.fillLightAct)
-
-    self.fillDarkAct = QAction(QIcon(QPixmap(os.path.join(main_path, './assets/tile3.png')).scaled(16, 16)), '&Dark Cell', self.mainActs)
-    self.fillDarkAct.setShortcut('3')
+    self.fillDarkAct = QAction(QIcon(os.path.join(main_path, './assets/icons/darkCell.ico')), '&Dark Cell', self.mainActs)
+    self.fillDarkAct.setShortcut('2')
     self.fillDarkAct.setStatusTip('Paint the dark cell')
     self.fillDarkAct.setCheckable(True)
-    self.fillDarkAct.triggered.connect(lambda : self.scene.setCellState(3))
+    self.fillDarkAct.triggered.connect(lambda : self.scene.setCellState(2))
     self.fillDarkAct.triggered.connect(lambda : self.ccwAct.setEnabled(False))
     self.fillDarkAct.triggered.connect(lambda : self.cwAct.setEnabled(False))
     self.cellActs.append(self.fillDarkAct)
 
-    self.fillColAct = QAction(QIcon(QPixmap(os.path.join(main_path, './assets/tileStack.png'))), '&Fill Column', self.mainActs)
+    self.fillLightAct = QAction(QIcon(os.path.join(main_path, './assets/icons/lightCell.ico')), '&Light Cell', self.mainActs)
+    self.fillLightAct.setShortcut('3')
+    self.fillLightAct.setStatusTip('Paint the light cell')
+    self.fillLightAct.setCheckable(True)
+    self.fillLightAct.triggered.connect(lambda : self.scene.setCellState(3))
+    self.fillLightAct.triggered.connect(lambda : self.ccwAct.setEnabled(False))
+    self.fillLightAct.triggered.connect(lambda : self.cwAct.setEnabled(False))
+    self.cellActs.append(self.fillLightAct)
+
+    self.fillColAct = QAction(QIcon(os.path.join(main_path, './assets/icons/stack.ico')), '&Stack Mode', self.mainActs)
     self.fillColAct.setShortcut('C')
     self.fillColAct.setStatusTip('Fill basic stack.')
     self.fillColAct.setCheckable(True)
@@ -189,7 +237,9 @@ class StackMaker(QMainWindow):
     self.center()
     self.setWindowTitle('Stackmaker')
 
-    self.view = QGraphicsView(self.scene)
+    self.view = View(self.scene)
+    self.view.setCacheMode(QGraphicsView.CacheBackground)
+    self.view.setViewportUpdateMode(QGraphicsView.FullViewportUpdate);
     self.view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
     self.view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
     self.setCentralWidget(self.view)
@@ -210,11 +260,12 @@ class StackMaker(QMainWindow):
 
   def copy(self):
     clipboard = QGuiApplication.clipboard()
-
-    board = QImage(self.scene.sceneRect().size().toSize(), QImage.Format_ARGB32)
+    rect = self.scene.sceneRect() if self.view.selection() != QRect() else self.view.sceneSelection()
+    board = QImage(rect.size().toSize(), QImage.Format_ARGB32)
     board.fill(Qt.transparent)
     painter = QPainter(board)
-    self.scene.render(painter)
+    self.scene.render(painter, QRectF(), rect)
+    board.scaled(board.width()*3, board.height()*3)
 
     clipboard.setImage(board)
     painter.end()
