@@ -14,6 +14,7 @@ class View(QGraphicsView):
     super().__init__(*args, **kwargs)
     self.rubberBand = QRubberBand(QRubberBand.Rectangle, self)
     self.baseRect = QRect()
+    self.clearSelection()
 
   # Returns a QRect that covers the scene tile the coords are over
   def _getBox(self, pos):
@@ -40,22 +41,25 @@ class View(QGraphicsView):
   def mousePressEvent(self, e):
     super().mousePressEvent(e)
     if e.button() == Qt.LeftButton:
-      self.baseRect = self._getBox(e.pos())
-      self.rubberBand.setGeometry(self.baseRect)
-      self.rubberBand.show()
+      if self.rubberBand.geometry() == QRect():
+        self.baseRect = self._getBox(e.pos())
+        self.rubberBand.setGeometry(self.baseRect)
+        self.rubberBand.show()
+      else:
+        self.clearSelection()
 
   def mouseMoveEvent(self, e):
     super().mouseMoveEvent(e)
-    if int(e.buttons()) & Qt.LeftButton:
+    if int(e.buttons()) & Qt.LeftButton and self.rubberBand.geometry() != QRect():
       newRect = self._getBox(e.pos())
       self.rubberBand.setGeometry(self.baseRect.united(newRect));
 
   def mouseReleaseEvent(self, e):
     super().mouseReleaseEvent(e)
 
-  def mouseDoubleClickEvent(self, e):
-    super().mouseDoubleClickEvent(e)
-    self.clearSelection()
+  # def mouseDoubleClickEvent(self, e):
+  #   super().mouseDoubleClickEvent(e)
+  #   self.clearSelection()
 
 class StackMaker(QMainWindow):
   def __init__(self, *args, **kwargs):
@@ -75,6 +79,13 @@ class StackMaker(QMainWindow):
     self.copyAct.setShortcut('Ctrl+C')
     self.copyAct.setStatusTip('Copy entire board')
     self.copyAct.triggered.connect(self.copy)
+
+    self.selectAct = QAction(QIcon(os.path.join(main_path, './assets/icons/select.ico')), '&Select', self)
+    self.selectAct.setShortcut('Shift+S')
+    self.selectAct.setStatusTip('Select board part for copying.')
+    self.selectAct.setCheckable(True)
+    self.selectAct.setEnabled(True)
+    # self.undoAct.triggered.connect(self.scene.undo)
 
     self.undoAct = QAction(QIcon(os.path.join(main_path, './assets/icons/undo.ico')), '&Undo', self)
     self.undoAct.setShortcut('Ctrl+Z')
@@ -189,6 +200,7 @@ class StackMaker(QMainWindow):
     fileMenu.addAction(self.copyAct)
 
     drawMenu = menubar.addMenu('&Draw')
+    drawMenu.addAction(self.selectAct)
     drawMenu.addAction(self.undoAct)
     drawMenu.addAction(self.redoAct)
     for act in self.cellActs:
@@ -213,6 +225,7 @@ class StackMaker(QMainWindow):
   def _createToolBar(self):
     self.toolbar = self.addToolBar('test')
     self.toolbar.setMovable(False)
+    self.toolbar.addAction(self.selectAct)
     self.toolbar.addAction(self.undoAct)
     self.toolbar.addAction(self.redoAct)
     self.toolbar.addSeparator()
@@ -260,14 +273,14 @@ class StackMaker(QMainWindow):
 
   def copy(self):
     clipboard = QGuiApplication.clipboard()
-    rect = self.scene.sceneRect() if self.view.selection() != QRect() else self.view.sceneSelection()
+    rect = self.scene.sceneRect() if self.view.selection() == QRect() else self.view.sceneSelection()
     board = QImage(rect.size().toSize(), QImage.Format_ARGB32)
     board.fill(Qt.transparent)
     painter = QPainter(board)
     self.scene.render(painter, QRectF(), rect)
-    board.scaled(board.width()*3, board.height()*3)
+    board1 = board.scaled(board.width()*2, board.height()*2)
 
-    clipboard.setImage(board)
+    clipboard.setImage(board1)
     painter.end()
     self.statusBar().showMessage('Copied!', 500)
 
