@@ -12,6 +12,7 @@ from src.scene import Scene
 class View(QGraphicsView):
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
+    self.rubberBandActive = False
     self.rubberBand = QRubberBand(QRubberBand.Rectangle, self)
     self.baseRect = QRect()
     self.clearSelection()
@@ -24,6 +25,13 @@ class View(QGraphicsView):
     topLeft = QPointF(8*newX, 8*newY)
     bottomRight = topLeft+QPointF(8.0,8.0)
     return QRect(self.mapFromScene(topLeft), self.mapFromScene(bottomRight))
+
+  def toggleBand(self):
+    self.rubberBandActive = not self.rubberBandActive
+    if self.rubberBandActive:
+      self.scene().cursor.setVisible(False)
+    else:
+      self.clearSelection()
 
   def clearSelection(self):
     self.rubberBand.setGeometry(QRect())
@@ -39,27 +47,32 @@ class View(QGraphicsView):
     return QRectF(topLeft, bottomRight)
 
   def mousePressEvent(self, e):
-    super().mousePressEvent(e)
-    if e.button() == Qt.LeftButton:
-      if self.rubberBand.geometry() == QRect():
-        self.baseRect = self._getBox(e.pos())
-        self.rubberBand.setGeometry(self.baseRect)
-        self.rubberBand.show()
-      else:
-        self.clearSelection()
-
+    if self.rubberBandActive:
+      if e.button() == Qt.LeftButton:
+        if self.rubberBand.geometry() == QRect():
+          self.baseRect = self._getBox(e.pos())
+          self.rubberBand.setGeometry(self.baseRect)
+          self.rubberBand.show()
+        else:
+          self.clearSelection()
+    else:
+      super().mousePressEvent(e)
   def mouseMoveEvent(self, e):
-    super().mouseMoveEvent(e)
-    if int(e.buttons()) & Qt.LeftButton and self.rubberBand.geometry() != QRect():
-      newRect = self._getBox(e.pos())
-      self.rubberBand.setGeometry(self.baseRect.united(newRect));
+    if self.rubberBandActive:
+      if int(e.buttons()) & Qt.LeftButton and self.rubberBand.geometry() != QRect():
+        newRect = self._getBox(e.pos())
+        self.rubberBand.setGeometry(self.baseRect.united(newRect))
+    else:
+      super().mouseMoveEvent(e)
+
 
   def mouseReleaseEvent(self, e):
     super().mouseReleaseEvent(e)
 
-  # def mouseDoubleClickEvent(self, e):
-  #   super().mouseDoubleClickEvent(e)
-  #   self.clearSelection()
+  def mouseDoubleClickEvent(self, e):
+    if not self.rubberBandActive:
+      super().mouseDoubleClickEvent(e)
+    # self.clearSelection()
 
 class StackMaker(QMainWindow):
   def __init__(self, *args, **kwargs):
@@ -80,12 +93,14 @@ class StackMaker(QMainWindow):
     self.copyAct.setStatusTip('Copy entire board')
     self.copyAct.triggered.connect(self.copy)
 
-    self.selectAct = QAction(QIcon(os.path.join(main_path, './assets/icons/select.ico')), '&Select', self)
+    self.mainActs = QActionGroup(self)
+
+    self.selectAct = QAction(QIcon(os.path.join(main_path, './assets/icons/select.ico')), '&Select', self.mainActs)
     self.selectAct.setShortcut('Shift+S')
     self.selectAct.setStatusTip('Select board part for copying.')
     self.selectAct.setCheckable(True)
     self.selectAct.setEnabled(True)
-    # self.undoAct.triggered.connect(self.scene.undo)
+    self.selectAct.toggled.connect(self.view.toggleBand)
 
     self.undoAct = QAction(QIcon(os.path.join(main_path, './assets/icons/undo.ico')), '&Undo', self)
     self.undoAct.setShortcut('Ctrl+Z')
@@ -111,8 +126,6 @@ class StackMaker(QMainWindow):
     self.cwAct.setStatusTip('Rotate clockwise')
     self.cwAct.setEnabled(False)
     self.cwAct.triggered.connect(self.scene.cursor.cw)
-
-    self.mainActs = QActionGroup(self)
 
     pieceNames = ['T','J','Z','O','S','L','I']
     self.pieceActs = []
@@ -239,6 +252,13 @@ class StackMaker(QMainWindow):
   def initUI(self):
     self.scene = Scene(10, 20)
 
+    self.view = View(self.scene)
+    self.view.setCacheMode(QGraphicsView.CacheBackground)
+    self.view.setViewportUpdateMode(QGraphicsView.FullViewportUpdate);
+    self.view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+    self.view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+    self.setCentralWidget(self.view)
+
     self._createActions()
     self._createMenuBar()
     self._createToolBar()
@@ -250,12 +270,6 @@ class StackMaker(QMainWindow):
     self.center()
     self.setWindowTitle('Stackmaker')
 
-    self.view = View(self.scene)
-    self.view.setCacheMode(QGraphicsView.CacheBackground)
-    self.view.setViewportUpdateMode(QGraphicsView.FullViewportUpdate);
-    self.view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-    self.view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-    self.setCentralWidget(self.view)
     self.show()
 
   def center(self):
@@ -299,7 +313,7 @@ class StackMaker(QMainWindow):
 
 def main():
   app = QApplication(sys.argv)
-  app.setWindowIcon(QIcon('./assets/tile3.png'))
+  app.setWindowIcon(QIcon('./assets/mainIcon.png'))
   ex = StackMaker()
   sys.exit(app.exec_())
 

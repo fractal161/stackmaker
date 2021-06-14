@@ -3,7 +3,7 @@ from PyQt5.QtNetwork import QTcpServer, QHostAddress
 import struct
 import json
 from random import randint
-import src.debug
+# import src.debug
 
 class OcrHandler(QTcpServer):
   def __init__(self, scene, *args, **kwargs):
