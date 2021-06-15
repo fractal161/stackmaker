@@ -1,5 +1,3 @@
-import os
-
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGraphicsPixmapItem
 from PyQt5.QtGui import QPixmap, QImage
@@ -25,7 +23,6 @@ class PaletteItem(QGraphicsPixmapItem):
     self.image = QImage(imageFile).convertToFormat(QImage.Format_Indexed8, [0xFFFFFEFF, 0xFF000000, 0xFF4240FF, 0xFFB53120])
 
     self.updatePalette(palette)
-    # self.setPixmap(QPixmap(self.image))
 
   def setOpacity(self, opacity):
     self.image.setColorTable([color & ((opacity << 24) | 0x00FFFFFF) for color in self.image.colorTable()])

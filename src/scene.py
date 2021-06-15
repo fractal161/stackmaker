@@ -1,5 +1,3 @@
-import os
-
 from PyQt5.QtCore import Qt, QRectF
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsPixmapItem
 from PyQt5.QtGui import QPixmap, QTransform
@@ -11,6 +9,7 @@ from .palette_item import PaletteItem
 from .piece import Piece
 from .connect import OcrHandler
 from .undo import *
+from .util import resource_path
 
 
 class Scene(QGraphicsScene):
@@ -23,9 +22,9 @@ class Scene(QGraphicsScene):
     self.ocrHandler = OcrHandler(self)
 
   def initScene(self):
-    main_path = os.path.dirname(__file__)
     self.setSceneRect(0,0,256,240)
-    bgImage = QPixmap(os.path.join(os.path.dirname(__file__), '../assets/boardLayout.png'))
+    bgImage = QPixmap(resource_path('./assets/boardLayout.png'))
+
     self.image = self.addPixmap(bgImage)
 
     self.board = Board(self, 10, 20)
@@ -49,8 +48,7 @@ class Scene(QGraphicsScene):
       statNum.translate(6 * 8, (12 + 2 * i) * 8)
       self.stats.append(statNum)
 
-    main_path = os.path.dirname(__file__)
-    self.statsPieces = PaletteItem(QPixmap(os.path.join(main_path, f'../assets/pieceStats.png')))
+    self.statsPieces = PaletteItem(QPixmap(resource_path(f'./assets/pieceStats.png')))
     self.statsPieces.setTransform(QTransform.fromTranslate(24, 88))
     self.addItem(self.statsPieces)
 

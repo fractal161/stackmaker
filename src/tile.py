@@ -1,16 +1,14 @@
-import os
-
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGraphicsPixmapItem
 from PyQt5.QtGui import QPixmap, QImage
 
+from .util import resource_path
 
 
 class Cell(QGraphicsPixmapItem):
   tiles = []
   for i in range(4):
-    main_path = os.path.dirname(__file__)
-    tiles.append(QImage(os.path.join(main_path, f'../assets/tile{i}.png')).convertToFormat(QImage.Format_Indexed8, [0xFFFFFEFF, 0xFF000000, 0xFF4240FF, 0xFFB53120]))
+    tiles.append(QImage(resource_path(f'./assets/tile{i}.png')).convertToFormat(QImage.Format_Indexed8, [0xFFFFFEFF, 0xFF000000, 0xFF4240FF, 0xFFB53120]))
 
   colors = [
     [0xFF4240FF, 0xFF64B0FF],
@@ -57,8 +55,7 @@ class Cell(QGraphicsPixmapItem):
 class Digit(QGraphicsPixmapItem):
   numbers = []
   for i in range(10):
-    main_path = os.path.dirname(__file__)
-    num = QImage(os.path.join(main_path, f'../assets/{i}.png')).convertToFormat(1)
+    num = QImage(resource_path(f'./assets/{i}.png')).convertToFormat(1)
     numbers.append(num)
 
   def __init__(self, state, color=0xFFFFFEFF):

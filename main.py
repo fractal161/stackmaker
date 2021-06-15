@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-import os
 import sys
 
 from PyQt5.QtCore import *
@@ -8,6 +7,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtNetwork import *
 
 from src.scene import Scene
+from src.util import resource_path
 
 class View(QGraphicsView):
   def __init__(self, *args, **kwargs):
@@ -80,35 +80,33 @@ class StackMaker(QMainWindow):
     self.initUI()
 
   def _createActions(self):
-    main_path = os.path.dirname(__file__)
-
     # https://realpython.com/python-menus-toolbars/ for menu stuff later
-    self.exitAct = QAction(QIcon(os.path.join(main_path, './assets/icons/exit.png')), '&Exit', self)
+    self.exitAct = QAction(QIcon(resource_path('./assets/icons/exit.png')), '&Exit', self)
     self.exitAct.setShortcut('Ctrl+Q')
     self.exitAct.setStatusTip('Exit application')
     self.exitAct.triggered.connect(qApp.quit)
 
-    self.copyAct = QAction(QIcon(os.path.join(main_path, './assets/icons/copy.png')), '&Copy', self)
+    self.copyAct = QAction(QIcon(resource_path('./assets/icons/copy.png')), '&Copy', self)
     self.copyAct.setShortcut('Ctrl+C')
     self.copyAct.setStatusTip('Copy entire board')
     self.copyAct.triggered.connect(self.copy)
 
     self.mainActs = QActionGroup(self)
 
-    self.selectAct = QAction(QIcon(os.path.join(main_path, './assets/icons/select.ico')), '&Select', self.mainActs)
+    self.selectAct = QAction(QIcon(resource_path('./assets/icons/select.ico')), '&Select', self.mainActs)
     self.selectAct.setShortcut('Shift+S')
     self.selectAct.setStatusTip('Select board part for copying.')
     self.selectAct.setCheckable(True)
     self.selectAct.setEnabled(True)
     self.selectAct.toggled.connect(self.view.toggleBand)
 
-    self.undoAct = QAction(QIcon(os.path.join(main_path, './assets/icons/undo.ico')), '&Undo', self)
+    self.undoAct = QAction(QIcon(resource_path('./assets/icons/undo.ico')), '&Undo', self)
     self.undoAct.setShortcut('Ctrl+Z')
     self.undoAct.setStatusTip('Undo most recent action')
     self.undoAct.setEnabled(True)
     self.undoAct.triggered.connect(self.scene.undo)
 
-    self.redoAct = QAction(QIcon(os.path.join(main_path, './assets/icons/redo.ico')), '&Redo', self)
+    self.redoAct = QAction(QIcon(resource_path('./assets/icons/redo.ico')), '&Redo', self)
     self.redoAct.setShortcut('Ctrl+Y')
     self.redoAct.setStatusTip('Redo most recent action')
     self.redoAct.setEnabled(True)
@@ -130,7 +128,7 @@ class StackMaker(QMainWindow):
     pieceNames = ['T','J','Z','O','S','L','I']
     self.pieceActs = []
     for i in range(7):
-      pieceAct = QAction(QIcon(os.path.join(main_path, f'./assets/icons/icon{pieceNames[i]}.ico')), pieceNames[i], self.mainActs)
+      pieceAct = QAction(QIcon(resource_path(f'./assets/icons/icon{pieceNames[i]}.ico')), pieceNames[i], self.mainActs)
       pieceAct.setShortcut(pieceNames[i])
       pieceAct.setStatusTip(f'Draw the {pieceNames[i]} piece')
       pieceAct.setCheckable(True)
@@ -142,7 +140,7 @@ class StackMaker(QMainWindow):
 
     self.cellActs = []
 
-    self.eraseAct = QAction(QIcon(QPixmap(os.path.join(main_path, './assets/tile0.png')).scaled(16, 16)), '&Erase', self.mainActs)
+    self.eraseAct = QAction(QIcon(QPixmap(resource_path('./assets/tile0.png')).scaled(16, 16)), '&Erase', self.mainActs)
     self.eraseAct.setShortcut('e')
     self.eraseAct.setStatusTip('Erase cell')
     self.eraseAct.setCheckable(True)
@@ -151,7 +149,7 @@ class StackMaker(QMainWindow):
     self.eraseAct.triggered.connect(lambda : self.cwAct.setEnabled(False))
     self.cellActs.append(self.eraseAct)
 
-    self.fillWhiteAct = QAction(QIcon(os.path.join(main_path, './assets/icons/whiteCell.ico')), '&White Cell', self.mainActs)
+    self.fillWhiteAct = QAction(QIcon(resource_path('./assets/icons/whiteCell.ico')), '&White Cell', self.mainActs)
     self.fillWhiteAct.setShortcut('1')
     self.fillWhiteAct.setStatusTip('Paint the white cell')
     self.fillWhiteAct.setCheckable(True)
@@ -161,7 +159,7 @@ class StackMaker(QMainWindow):
     self.fillWhiteAct.triggered.connect(lambda : self.cwAct.setEnabled(False))
     self.cellActs.append(self.fillWhiteAct)
 
-    self.fillDarkAct = QAction(QIcon(os.path.join(main_path, './assets/icons/darkCell.ico')), '&Dark Cell', self.mainActs)
+    self.fillDarkAct = QAction(QIcon(resource_path('./assets/icons/darkCell.ico')), '&Dark Cell', self.mainActs)
     self.fillDarkAct.setShortcut('2')
     self.fillDarkAct.setStatusTip('Paint the dark cell')
     self.fillDarkAct.setCheckable(True)
@@ -170,7 +168,7 @@ class StackMaker(QMainWindow):
     self.fillDarkAct.triggered.connect(lambda : self.cwAct.setEnabled(False))
     self.cellActs.append(self.fillDarkAct)
 
-    self.fillLightAct = QAction(QIcon(os.path.join(main_path, './assets/icons/lightCell.ico')), '&Light Cell', self.mainActs)
+    self.fillLightAct = QAction(QIcon(resource_path('./assets/icons/lightCell.ico')), '&Light Cell', self.mainActs)
     self.fillLightAct.setShortcut('3')
     self.fillLightAct.setStatusTip('Paint the light cell')
     self.fillLightAct.setCheckable(True)
@@ -179,7 +177,7 @@ class StackMaker(QMainWindow):
     self.fillLightAct.triggered.connect(lambda : self.cwAct.setEnabled(False))
     self.cellActs.append(self.fillLightAct)
 
-    self.fillColAct = QAction(QIcon(os.path.join(main_path, './assets/icons/stack.ico')), '&Stack Mode', self.mainActs)
+    self.fillColAct = QAction(QIcon(resource_path('./assets/icons/stack.ico')), '&Stack Mode', self.mainActs)
     self.fillColAct.setShortcut('C')
     self.fillColAct.setStatusTip('Fill basic stack.')
     self.fillColAct.setCheckable(True)
@@ -250,6 +248,10 @@ class StackMaker(QMainWindow):
       self.toolbar.addAction(act)
 
   def initUI(self):
+    # if getattr(sys,'frozen'):
+    #   print("frozen")
+    # else:
+    #   print("warm")
     self.scene = Scene(10, 20)
 
     self.view = View(self.scene)
@@ -313,7 +315,7 @@ class StackMaker(QMainWindow):
 
 def main():
   app = QApplication(sys.argv)
-  app.setWindowIcon(QIcon('./assets/mainIcon.png'))
+  app.setWindowIcon(QIcon(resource_path('./assets/mainIcon.png')))
   ex = StackMaker()
   sys.exit(app.exec_())
 
