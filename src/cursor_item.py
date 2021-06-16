@@ -1,6 +1,6 @@
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
+from PyQt5.QtCore import Qt, QPointF, QRectF
+from PyQt5.QtWidgets import QGraphicsItem, QGraphicsRectItem
+from PyQt5.QtGui import QPen, QTransform, QPainterPath
 from .tile import Cell
 from .piece import Piece
 

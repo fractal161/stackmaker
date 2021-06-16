@@ -1,10 +1,13 @@
 #!/usr/bin/python3
 import sys
 
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtNetwork import *
+from PyQt5.QtCore import Qt, QRect, QRectF, QPointF
+from PyQt5.QtWidgets import (
+QApplication, QAction, QActionGroup, qApp,
+QDesktopWidget, QGraphicsView, QMainWindow, QRubberBand
+)
+from PyQt5.QtGui import QGuiApplication, QIcon, QPixmap, QImage, QPainter
+from PyQt5.QtNetwork import QHostAddress
 
 from src.scene import Scene
 from src.util import resource_path
@@ -139,51 +142,31 @@ class StackMaker(QMainWindow):
       self.pieceActs.append(pieceAct)
 
     self.cellActs = []
+    icons = [
+      QIcon(QPixmap(resource_path('./assets/tile0.png')).scaled(16, 16)),
+      QIcon(resource_path('./assets/icons/whiteCell.ico')),
+      QIcon(resource_path('./assets/icons/darkCell.ico')),
+      QIcon(resource_path('./assets/icons/lightCell.ico')),
+      QIcon(resource_path('./assets/icons/stack.ico'))
+    ]
+    names = ['&Erase', '&White Cell', '&Dark Cell', '&Light Cell', '&Stack Mode']
+    shortcuts = ['E', '1', '2', '3', 'C']
+    tips = ['Erase cell', 'Paint the white cell', 'Paint the dark cell', 'Paint the light cell', 'Fill basic stack']
 
-    self.eraseAct = QAction(QIcon(QPixmap(resource_path('./assets/tile0.png')).scaled(16, 16)), '&Erase', self.mainActs)
-    self.eraseAct.setShortcut('e')
-    self.eraseAct.setStatusTip('Erase cell')
-    self.eraseAct.setCheckable(True)
-    self.eraseAct.triggered.connect(lambda : self.scene.setCellState(0))
-    self.eraseAct.triggered.connect(lambda : self.ccwAct.setEnabled(False))
-    self.eraseAct.triggered.connect(lambda : self.cwAct.setEnabled(False))
-    self.cellActs.append(self.eraseAct)
+    for i in range(5):
+      cellAct = QAction(icons[i], names[i], self.mainActs)
+      cellAct.setShortcut(shortcuts[i])
+      cellAct.setStatusTip(tips[i])
+      cellAct.setCheckable(True)
+      if i == 4:
+        cellAct.triggered.connect(lambda : self.scene.setColCursor())
+      else:
+        cellAct.triggered.connect(lambda x=False,i=i : self.scene.setCellState(i))
+      cellAct.triggered.connect(lambda : self.ccwAct.setEnabled(False))
+      cellAct.triggered.connect(lambda : self.cwAct.setEnabled(False))
+      self.cellActs.append(cellAct)
 
-    self.fillWhiteAct = QAction(QIcon(resource_path('./assets/icons/whiteCell.ico')), '&White Cell', self.mainActs)
-    self.fillWhiteAct.setShortcut('1')
-    self.fillWhiteAct.setStatusTip('Paint the white cell')
-    self.fillWhiteAct.setCheckable(True)
-    self.fillWhiteAct.setChecked(True)
-    self.fillWhiteAct.triggered.connect(lambda : self.scene.setCellState(1))
-    self.fillWhiteAct.triggered.connect(lambda : self.ccwAct.setEnabled(False))
-    self.fillWhiteAct.triggered.connect(lambda : self.cwAct.setEnabled(False))
-    self.cellActs.append(self.fillWhiteAct)
-
-    self.fillDarkAct = QAction(QIcon(resource_path('./assets/icons/darkCell.ico')), '&Dark Cell', self.mainActs)
-    self.fillDarkAct.setShortcut('2')
-    self.fillDarkAct.setStatusTip('Paint the dark cell')
-    self.fillDarkAct.setCheckable(True)
-    self.fillDarkAct.triggered.connect(lambda : self.scene.setCellState(2))
-    self.fillDarkAct.triggered.connect(lambda : self.ccwAct.setEnabled(False))
-    self.fillDarkAct.triggered.connect(lambda : self.cwAct.setEnabled(False))
-    self.cellActs.append(self.fillDarkAct)
-
-    self.fillLightAct = QAction(QIcon(resource_path('./assets/icons/lightCell.ico')), '&Light Cell', self.mainActs)
-    self.fillLightAct.setShortcut('3')
-    self.fillLightAct.setStatusTip('Paint the light cell')
-    self.fillLightAct.setCheckable(True)
-    self.fillLightAct.triggered.connect(lambda : self.scene.setCellState(3))
-    self.fillLightAct.triggered.connect(lambda : self.ccwAct.setEnabled(False))
-    self.fillLightAct.triggered.connect(lambda : self.cwAct.setEnabled(False))
-    self.cellActs.append(self.fillLightAct)
-
-    self.fillColAct = QAction(QIcon(resource_path('./assets/icons/stack.ico')), '&Stack Mode', self.mainActs)
-    self.fillColAct.setShortcut('C')
-    self.fillColAct.setStatusTip('Fill basic stack.')
-    self.fillColAct.setCheckable(True)
-    self.fillColAct.triggered.connect(lambda : self.scene.setColCursor())
-    self.fillColAct.triggered.connect(lambda : self.ccwAct.setEnabled(False))
-    self.fillColAct.triggered.connect(lambda : self.cwAct.setEnabled(False))
+    self.cellActs[1].setChecked(True)
 
     self.transparentAct = QAction(QIcon(), '&Transparent')
     self.transparentAct.setShortcut('Ctrl+V')
@@ -216,8 +199,6 @@ class StackMaker(QMainWindow):
     drawMenu.addAction(self.redoAct)
     for act in self.cellActs:
       drawMenu.addAction(act)
-    drawMenu.addAction(self.fillColAct)
-    # drawMenu.addSeparator()
     pieceMenu = drawMenu.addMenu('&Piece')
     for act in self.pieceActs:
       pieceMenu.addAction(act)
@@ -242,16 +223,11 @@ class StackMaker(QMainWindow):
     self.toolbar.addSeparator()
     for act in self.cellActs:
       self.toolbar.addAction(act)
-    self.toolbar.addAction(self.fillColAct)
     self.toolbar.addSeparator()
     for act in self.pieceActs:
       self.toolbar.addAction(act)
 
   def initUI(self):
-    # if getattr(sys,'frozen'):
-    #   print("frozen")
-    # else:
-    #   print("warm")
     self.scene = Scene(10, 20)
 
     self.view = View(self.scene)
