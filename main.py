@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import (
 QApplication, QAction, QActionGroup, qApp,
 QDesktopWidget, QGraphicsView, QMainWindow, QRubberBand
 )
-from PyQt5.QtGui import QGuiApplication, QIcon, QPixmap, QImage, QPainter
+from PyQt5.QtGui import QGuiApplication, QIcon, QPixmap, QImage, QPainter, QTransform
 from PyQt5.QtNetwork import QHostAddress
 
 from src.scene import Scene
@@ -19,6 +19,7 @@ class View(QGraphicsView):
     self.rubberBand = QRubberBand(QRubberBand.Rectangle, self)
     self.baseRect = QRect()
     self.clearSelection()
+    self.setStyleSheet("border: 1px solid black")
 
   # Returns a QRect that covers the scene tile the coords are over
   def _getBox(self, pos):
@@ -28,6 +29,11 @@ class View(QGraphicsView):
     topLeft = QPointF(8*newX, 8*newY)
     bottomRight = topLeft+QPointF(8.0,8.0)
     return QRect(self.mapFromScene(topLeft), self.mapFromScene(bottomRight))
+
+  def setRect(self):
+    self.setTransform(QTransform())
+    self.scale(self.viewport().width() / max(1, self.sceneRect().width()), self.viewport().height() / max(1, self.sceneRect().height()))
+
 
   def toggleBand(self):
     self.rubberBandActive = not self.rubberBandActive
@@ -60,6 +66,8 @@ class View(QGraphicsView):
           self.clearSelection()
     else:
       super().mousePressEvent(e)
+      print(e.pos())
+      print(self.mapToScene(e.pos()))
   def mouseMoveEvent(self, e):
     if self.rubberBandActive:
       if int(e.buttons()) & Qt.LeftButton and self.rubberBand.geometry() != QRect():
@@ -76,6 +84,12 @@ class View(QGraphicsView):
     if not self.rubberBandActive:
       super().mouseDoubleClickEvent(e)
     # self.clearSelection()
+
+  def paintEvent(self, e):
+    super().paintEvent(e)
+    painter = QPainter(self.viewport())
+    painter.end()
+
 
 class StackMaker(QMainWindow):
   def __init__(self, *args, **kwargs):
@@ -244,7 +258,7 @@ class StackMaker(QMainWindow):
     statusbar = self.statusBar()
     statusbar.setStyleSheet('QStatusBar{border-top: 1px outset grey;}')
 
-    self.resize(768, 720 + self.statusBar().sizeHint().height() + self.menuBar().sizeHint().height() + self.toolbar.height())
+    self.resize(768, 720 + self.statusBar().sizeHint().height() + self.menuBar().sizeHint().height() + self.toolbar.sizeHint().height()) #Toolbar
     self.center()
     self.setWindowTitle('Stackmaker')
 
@@ -260,8 +274,13 @@ class StackMaker(QMainWindow):
 
   # Resizing the viewport is necessary for some reason. Should check why this needs to be used
   def resizeEvent(self, e):
-    self.view.viewport().resize(self.width(), self.height() - self.statusBar().sizeHint().height()-self.menuBar().sizeHint().height()-self.toolbar.height())
-    self.view.fitInView(self.view.sceneRect(), Qt.KeepAspectRatio)
+    self.view.viewport().resize(self.width(), self.height() - self.statusBar().sizeHint().height()-self.menuBar().sizeHint().height()-self.toolbar.sizeHint().height())
+    print(self.width(), self.height())
+    print(self.view.width(), self.view.height())
+    # print(self.view.minimumSizeHint())
+    # # print(self.view.viewport().width(), self.view.viewport().height())
+    # # self.view.fitInView(self.view.sceneRect(), Qt.KeepAspectRatio)
+    self.view.setRect()
 
   def copy(self):
     clipboard = QGuiApplication.clipboard()
